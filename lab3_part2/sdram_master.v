@@ -1,9 +1,9 @@
-// `define SDRAM_BASE 32'hC4000000
 `define SDRAM_BASE 32'h0
 `define SECOND 32'd50000000 // 50 million clock cycles = 1 second
-`define ADDR 2
-`define DONE 1
 `define IDLE 0
+`define WRITE 1
+`define READ 2
+`define DONE 3
 
 module sdram_master (
 input clk,
@@ -18,82 +18,91 @@ output reg [31:0] address = `SDRAM_BASE,
 output reg [1:0] byteenable = 2'b11,
 output reg [15:0] writedata = 16'hBEEF,
 
-// conduits for debuggings
+// control signals
 input ready,
-output [31:0] maxmin,
-output reg done = 0
+output reg done = 0,
+
+// debugging
+output reg [15:0] max = 16'h0000,
+output reg [15:0] min = 16'hFFFF,
+output reg [1:0] state = 2'b00,
+input test_rd_wr, // set to 1 to read, 0 to write
+input [3:0] read_index
 );
-
-assign maxmin = {max,min};
-
-reg [15:0] max = 16'h0;		// current max val
-reg [15:0] min = 16'hFFFF;		// curent min val
-
-reg [3:0] reading = 4'b0; 	// current number reading (index in array)
-reg [31:0] counter = 32'b0;
-reg [1:0] state = 0;
 
 always @(*) begin
 	byteenable <= 2'b11;
 	chipselect <= 1;
 end
 
+// STATE LOGIC
 always @(posedge clk)
 begin
-	case (state)
-	`IDLE: state <= (counter > `SECOND) ? `ADDR : `IDLE;
-	`ADDR: state <= (waitrequest) ? `ADDR : `DONE;
-	`DONE: state <= `DONE;
-	default: state <= state;
-	endcase
+	if(~reset_n) begin
+		state <= `IDLE;
+	end
+	else begin
+		case (state)
+		`IDLE:
+			begin
+				if(counter > `SECOND) begin
+					state <= test_rd_wr ? `READ : `WRITE;
+				end
+				else begin
+					state <= `IDLE;
+				end
+			end
+		`WRITE: state <= (waitrequest) ? `WRITE : `DONE;
+		`READ: state <= (waitrequest) ? `READ : `DONE;
+		`DONE: state <= `DONE;
+		default: state <= state;
+		endcase
+	end
 end
+
 
 always @(posedge clk) begin
-	case (state)
-	`IDLE:
-	begin
-		counter <= counter + 1;
-		 write_n <= 1;
-		 address <= 0;
-		 writedata = 16'hABCD;
-
-
-
-	end	
-	`ADDR: 
-	begin
-		write_n <= 0;
-		address <= 0;		
-	 	writedata = 16'hBCDE;
-
-	end
-	`DONE:
-	begin	
+	if(~reset_n) begin
+		counter <= 0;
 		write_n <= 1;
 		address <= 0;
-		writedata = 16'hBEEF;
-
-
+		writedata <= 16'hF00D;
 	end
-	endcase
-//	if(timer < 32'd50000000) begin
-//		write_n <= 1;
-//		timer <= timer + 1;
-//	end
-//	else if(timer < 32'd70000000) begin
-//		write_n <= 0;
-//		timer <= timer + 1;
-//	end
-//	else begin
-//		write_n <= 0;
-//		timer <= 0;
-//	end
-//
-//	write_n <= (!waitrequest) ? 0 : 1;
-//	address <= 0;
-//	writedata <= 16'hBEEF;
+	else begin
+		case (state)
+		`IDLE:
+			begin
+				counter <= counter + 1;
+				write_n <= 1;
+				address <= 0;
+				writedata = 16'hABCD;
+			end	
+		`WRITE: 
+			begin
+				write_n <= 0;
+				address <= 0;		
+				writedata = 16'hBCDE;
+			end
+		`READ:
+			begin
+				read_n <= 0;
+				address <= read_index;
+				write_n <= 1;
+				writedata <= 16'hEEEE; // to make sure it doesn't write
+				min <= readdata;
+				max <= readdatavalid ? readdata : max;
+			end
+		`DONE:
+			begin	
+				read_n <= 1;
+				write_n <= 1;
+				address <= 0;
+				writedata = 16'hBEEF;
+				min <= readdata;
+				max <= readdatavalid ? readdata : max;
+			end
+		endcase
+	end
 end
-
-
 
 endmodule
