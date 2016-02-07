@@ -26,7 +26,14 @@ module mysystem (
 	sdram_wire_dq,
 	sdram_wire_dqm,
 	sdram_wire_ras_n,
-	sdram_wire_we_n);	
+	sdram_wire_we_n,
+	sdram_master_debug_max_out,
+	sdram_master_debug_min_out,
+	sdram_master_debug_state_out,
+	sdram_master_debug_read_index_in,
+	sdram_master_debug_test_rd_wr_in,
+	sdram_master_control_done_out,
+	sdram_master_control_ready_in);	
 
 	input		clk_clk;
 	output	[12:0]	memory_mem_a;
@@ -55,4 +62,11 @@ module mysystem (
 	output	[1:0]	sdram_wire_dqm;
 	output		sdram_wire_ras_n;
 	output		sdram_wire_we_n;
+	output	[15:0]	sdram_master_debug_max_out;
+	output	[15:0]	sdram_master_debug_min_out;
+	output	[1:0]	sdram_master_debug_state_out;
+	input	[3:0]	sdram_master_debug_read_index_in;
+	input		sdram_master_debug_test_rd_wr_in;
+	output		sdram_master_control_done_out;
+	input		sdram_master_control_ready_in;
 endmodule

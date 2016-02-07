@@ -62,6 +62,14 @@
          type = "String";
       }
    }
+   element sdram_master_0
+   {
+      datum _sortIndex
+      {
+         value = "5";
+         type = "int";
+      }
+   }
    element system_console
    {
       datum _sortIndex
@@ -105,6 +113,16 @@
    name="reset"
    internal="System_Clk.clk_in_reset"
    type="reset"
+   dir="end" />
+ <interface
+   name="sdram_master_control"
+   internal="sdram_master_0.control"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="sdram_master_debug"
+   internal="sdram_master_0.debugging"
+   type="conduit"
    dir="end" />
  <interface name="sdram_wire" internal="SDRAM.wire" type="conduit" dir="end" />
  <module name="Arm_A9_HPS" kind="altera_hps" version="15.1" enabled="1">
@@ -699,6 +717,7 @@
   <parameter name="useShallowMemBlocks" value="false" />
   <parameter name="writable" value="true" />
  </module>
+ <module name="sdram_master_0" kind="sdram_master" version="1.0" enabled="1" />
  <module
    name="system_console"
    kind="altera_avalon_jtag_uart"
@@ -718,6 +737,15 @@
   <parameter name="writeBufferDepth" value="64" />
   <parameter name="writeIRQThreshold" value="8" />
  </module>
+ <connection
+   kind="avalon"
+   version="15.1"
+   start="sdram_master_0.avalon_master"
+   end="SDRAM.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x04000000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
  <connection
    kind="avalon"
    version="15.1"
@@ -756,6 +784,11 @@
    kind="clock"
    version="15.1"
    start="System_Clk.clk"
+   end="sdram_master_0.clock" />
+ <connection
+   kind="clock"
+   version="15.1"
+   start="System_Clk.clk"
    end="Arm_A9_HPS.f2h_axi_clock" />
  <connection
    kind="clock"
@@ -788,6 +821,11 @@
    kind="reset"
    version="15.1"
    start="System_Clk.clk_reset"
+   end="sdram_master_0.reset" />
+ <connection
+   kind="reset"
+   version="15.1"
+   start="System_Clk.clk_reset"
    end="ram.reset1" />
  <connection
    kind="reset"
@@ -799,6 +837,11 @@
    version="15.1"
    start="Arm_A9_HPS.h2f_reset"
    end="SDRAM.reset" />
+ <connection
+   kind="reset"
+   version="15.1"
+   start="Arm_A9_HPS.h2f_reset"
+   end="sdram_master_0.reset" />
  <connection
    kind="reset"
    version="15.1"
