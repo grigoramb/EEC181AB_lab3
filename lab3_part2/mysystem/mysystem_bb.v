@@ -1,6 +1,6 @@
 
 module mysystem (
-	clk_clk,
+	done_bit_export,
 	memory_mem_a,
 	memory_mem_ba,
 	memory_mem_ck,
@@ -17,7 +17,8 @@ module mysystem (
 	memory_mem_odt,
 	memory_mem_dm,
 	memory_oct_rzqin,
-	reset_reset_n,
+	ready_bit_export,
+	sdram_clk_clk,
 	sdram_wire_addr,
 	sdram_wire_ba,
 	sdram_wire_cas_n,
@@ -27,15 +28,17 @@ module mysystem (
 	sdram_wire_dqm,
 	sdram_wire_ras_n,
 	sdram_wire_we_n,
-	sdram_master_debug_max_out,
-	sdram_master_debug_min_out,
-	sdram_master_debug_state_out,
-	sdram_master_debug_read_index_in,
-	sdram_master_debug_test_rd_wr_in,
-	sdram_master_control_done_out,
-	sdram_master_control_ready_in);	
+	system_ref_clk_clk,
+	system_ref_reset_reset,
+	sdram_master_0_control_done_out,
+	sdram_master_0_control_ready_in,
+	sdram_master_0_debug_max_out,
+	sdram_master_0_debug_min_out,
+	sdram_master_0_debug_state_out,
+	sdram_master_0_debug_test_rd_wr_in,
+	sdram_master_0_debug_read_index_in);	
 
-	input		clk_clk;
+	input		done_bit_export;
 	output	[12:0]	memory_mem_a;
 	output	[2:0]	memory_mem_ba;
 	output		memory_mem_ck;
@@ -52,7 +55,8 @@ module mysystem (
 	output		memory_mem_odt;
 	output		memory_mem_dm;
 	input		memory_oct_rzqin;
-	input		reset_reset_n;
+	output		ready_bit_export;
+	output		sdram_clk_clk;
 	output	[12:0]	sdram_wire_addr;
 	output	[1:0]	sdram_wire_ba;
 	output		sdram_wire_cas_n;
@@ -62,11 +66,13 @@ module mysystem (
 	output	[1:0]	sdram_wire_dqm;
 	output		sdram_wire_ras_n;
 	output		sdram_wire_we_n;
-	output	[15:0]	sdram_master_debug_max_out;
-	output	[15:0]	sdram_master_debug_min_out;
-	output	[1:0]	sdram_master_debug_state_out;
-	input	[3:0]	sdram_master_debug_read_index_in;
-	input		sdram_master_debug_test_rd_wr_in;
-	output		sdram_master_control_done_out;
-	input		sdram_master_control_ready_in;
+	input		system_ref_clk_clk;
+	input		system_ref_reset_reset;
+	output		sdram_master_0_control_done_out;
+	input		sdram_master_0_control_ready_in;
+	output	[15:0]	sdram_master_0_debug_max_out;
+	output	[15:0]	sdram_master_0_debug_min_out;
+	output	[1:0]	sdram_master_0_debug_state_out;
+	input		sdram_master_0_debug_test_rd_wr_in;
+	input	[3:0]	sdram_master_0_debug_read_index_in;
 endmodule

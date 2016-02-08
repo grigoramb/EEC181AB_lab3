@@ -1,5 +1,5 @@
 //altiobuf_out CBX_AUTO_BLACKBOX="ALL" CBX_SINGLE_OUTPUT_FILE="ON" DEVICE_FAMILY="Cyclone V" ENABLE_BUS_HOLD="FALSE" NUMBER_OF_CHANNELS=1 OPEN_DRAIN_OUTPUT="FALSE" PSEUDO_DIFFERENTIAL_MODE="TRUE" USE_DIFFERENTIAL_MODE="TRUE" USE_OE="FALSE" USE_OUT_DYNAMIC_DELAY_CHAIN1="FALSE" USE_OUT_DYNAMIC_DELAY_CHAIN2="FALSE" USE_TERMINATION_CONTROL="FALSE" datain dataout dataout_b
-//VERSION_BEGIN 15.1 cbx_altiobuf_out 2015:10:14:18:59:15:SJ cbx_mgl 2015:10:21:19:02:34:SJ cbx_stratixiii 2015:10:14:18:59:15:SJ cbx_stratixv 2015:10:14:18:59:15:SJ  VERSION_END
+//VERSION_BEGIN 15.0 cbx_altiobuf_out 2015:04:15:19:11:38:SJ cbx_mgl 2015:04:15:20:18:26:SJ cbx_stratixiii 2015:04:15:19:11:39:SJ cbx_stratixv 2015:04:15:19:11:39:SJ  VERSION_END
 // synthesis VERILOG_INPUT_VERSION VERILOG_2001
 // altera message_off 10463
 
@@ -12,7 +12,7 @@
 //  (including device programming or simulation files), and any 
 //  associated documentation or information are expressly subject 
 //  to the terms and conditions of the Altera Program License 
-//  Subscription Agreement, the Altera Quartus Prime License Agreement,
+//  Subscription Agreement, the Altera Quartus II License Agreement,
 //  the Altera MegaCore Function License Agreement, or other 
 //  applicable license agreement, including, without limitation, 
 //  that your use is for the sole purpose of programming logic 

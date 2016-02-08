@@ -1,0 +1,119 @@
+
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdint.h>
+
+static inline unsigned int getCycles ()
+{
+ unsigned int cycleCount;
+ // Read CCNT register
+ asm volatile ("MRC p15, 0, %0, c9, c13, 0\t\n": "=r"(cycleCount));
+ return cycleCount;
+}
+static inline void initCounters ()
+{
+ // Enable user access to performance counter
+ asm volatile ("MCR p15, 0, %0, C9, C14, 0\t\n" :: "r"(1));
+ // Reset all counters to zero
+ int MCRP15ResetAll = 23;
+ asm volatile ("MCR p15, 0, %0, c9, c12, 0\t\n" :: "r"(MCRP15ResetAll));
+ // Enable all counters:
+ asm volatile ("MCR p15, 0, %0, c9, c12, 1\t\n" :: "r"(0x8000000f));
+ // Disable counter interrupts
+ asm volatile ("MCR p15, 0, %0, C9, C14, 2\t\n" :: "r"(0x8000000f));
+ // Clear overflows:
+ asm volatile ("MCR p15, 0, %0, c9, c12, 3\t\n" :: "r"(0x8000000f));
+}
+
+
+int main(void)
+{
+  volatile uint32_t * FPGA_onchip = (uint32_t *) 0xC0000000;
+  volatile uint32_t * FPGA_SDRAM = (uint32_t *) 0xC4000000;
+  volatile uint32_t * HPS_onchip = (uint32_t *) 0xFFFF0000;
+  volatile uint32_t * HPS_SDRAM = (uint32_t *) 0x00100000;
+
+
+  printf("Greetings and salutations\n");
+
+	int location;
+	int i = 0;
+	int value;
+	int number = 0x0;
+	int fakeCounter = 0;
+	unsigned int time;
+
+	int startval = 0x0;
+	int val;
+	int j;
+	volatile uint32_t * addresses[4] = {FPGA_onchip, FPGA_SDRAM, HPS_onchip, HPS_SDRAM};
+	volatile uint32_t * adr;
+
+	char locations[4][20] = {"FPGA Onchip","FPGA SDRAM","HPS Onchip","HPS SDRAM"};
+
+	int num_invalid;
+
+	int avail_mem;
+		
+
+	while(1){
+
+		initCounters ();
+		location = 5; 
+		num_invalid = 0;
+		while(location < 0 || location > 3){
+			printf("Choose memory block to write to:\n");
+			for(i = 0; i < 4; i++)
+				printf("  %d: %s\n",i,locations[i]); // (0=FPGA Onchip, 1=FPGA SDRAM, 2=HPS Onchip, 3=HPS SDRAM):");
+			scanf("%d", &location);
+			fflush(stdin);
+		}
+		avail_mem = location ? 32 : 16; // 16kb for location 0, 32kb for the rest
+
+		printf("\nWriting %dKB to %s.\n\n", avail_mem, locations[location]);
+
+		 avail_mem*=256; // set to num blocks
+
+
+		time = getCycles();
+
+		for(adr = addresses[location], val = startval, i = 0;
+			(i < avail_mem)&& (val <= 4000); i++){
+				if(val == 512)
+					printf("before 512 write: %d\n", *(adr+1));
+				*(adr++) = val++;
+				if(*(adr-1) != val-1){
+					printf("%d != %d\n",val-1,*(adr-1));
+					for(j = 0; j<64000; j++); //delay
+				}
+				if(val-1 == 512)
+					printf("after 512 write: %d\nadr0:%d\n", *(adr-1),*(addresses[location]));
+		}
+
+		time = getCycles() - time;
+		printf ("Elapsed Time: %d cycles\n", time);
+
+
+		printf("\nReading %dKB from %s.\n\n", avail_mem/256, locations[location]);
+		int j;
+		time = getCycles();
+
+		for(adr = addresses[location], val = startval, i = 0;
+			i < avail_mem; i++)
+				if(*(adr++) != val++){
+					num_invalid++;
+					printf("%d != %d\n",val-1,*(adr-1));
+					for(j = 0; j<64000; j++); //delay
+				}
+
+		time = getCycles() - time;
+		printf ("Elapsed Time: %d cycles\n", time);
+
+		printf("Number of invalid blocks: %d\n\n\n", num_invalid);
+
+	
+
+} //while
+ }//main

@@ -24,9 +24,9 @@
 // agreement for further details.
 
 
-// $Id: //acds/rel/15.1/ip/merlin/altera_merlin_router/altera_merlin_router.sv.terp#1 $
+// $Id: //acds/rel/15.0/ip/merlin/altera_merlin_router/altera_merlin_router.sv.terp#1 $
 // $Revision: #1 $
-// $Date: 2015/08/09 $
+// $Date: 2015/02/08 $
 // $Author: swbranch $
 
 // -------------------------------------------------------
@@ -134,13 +134,13 @@ module mysystem_mm_interconnect_0_router_002
     // Figure out the number of bits to mask off for each slave span
     // during address decoding
     // -------------------------------------------------------
-    localparam PAD0 = log2ceil(64'h8000000 - 64'h4000000); 
+    localparam PAD0 = log2ceil(64'h4000000 - 64'h0); 
     // -------------------------------------------------------
     // Work out which address bits are significant based on the
     // address range of the slaves. If the required width is too
     // large or too small, we use the address field width instead.
     // -------------------------------------------------------
-    localparam ADDR_RANGE = 64'h8000000;
+    localparam ADDR_RANGE = 64'h4000000;
     localparam RANGE_ADDR_WIDTH = log2ceil(ADDR_RANGE);
     localparam OPTIMIZED_ADDR_H = (RANGE_ADDR_WIDTH > PKT_ADDR_W) ||
                                   (RANGE_ADDR_WIDTH == 0) ?
@@ -184,7 +184,7 @@ module mysystem_mm_interconnect_0_router_002
         // --------------------------------------------------
            
          
-          // ( 4000000 .. 8000000 )
+          // ( 0 .. 4000000 )
           src_channel = 3'b1;
           src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 0;
 	     

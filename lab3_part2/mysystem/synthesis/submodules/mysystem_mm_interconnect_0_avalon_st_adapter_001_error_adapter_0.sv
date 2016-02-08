@@ -81,13 +81,13 @@ module mysystem_mm_interconnect_0_avalon_st_adapter_001_error_adapter_0
 
  /*AUTOARG*/);
    
-   reg in_error = 0;
+   reg in_error;   
    initial in_error = 0;
 
    // ---------------------------------------------------------------------
    //| Pass-through Mapping
    // ---------------------------------------------------------------------
-   always_comb begin
+   always @* begin
       in_ready = out_ready;
       out_valid = in_valid;
       out_data = in_data;
@@ -97,7 +97,7 @@ module mysystem_mm_interconnect_0_avalon_st_adapter_001_error_adapter_0
    // ---------------------------------------------------------------------
    //| Error Mapping 
    // ---------------------------------------------------------------------
-   always_comb begin
+   always @* begin
       out_error = 0;
       
       out_error = in_error;

@@ -21,7 +21,7 @@
    {
       datum _sortIndex
       {
-         value = "7";
+         value = "4";
          type = "int";
       }
    }
@@ -42,7 +42,7 @@
    {
       datum _sortIndex
       {
-         value = "10";
+         value = "7";
          type = "int";
       }
    }
@@ -51,22 +51,6 @@
       datum baseAddress
       {
          value = "0";
-         type = "String";
-      }
-   }
-   element hex5_hex0
-   {
-      datum _sortIndex
-      {
-         value = "4";
-         type = "int";
-      }
-   }
-   element hex5_hex0.s1
-   {
-      datum baseAddress
-      {
-         value = "48";
          type = "String";
       }
    }
@@ -118,6 +102,14 @@
          type = "String";
       }
    }
+   element mysystem
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Cyclone V";
+         type = "String";
+      }
+   }
    element onchip_memory2_0
    {
       datum _sortIndex
@@ -134,27 +126,11 @@
          type = "String";
       }
    }
-   element pushbuttons
-   {
-      datum _sortIndex
-      {
-         value = "5";
-         type = "int";
-      }
-   }
-   element pushbuttons.s1
-   {
-      datum baseAddress
-      {
-         value = "32";
-         type = "String";
-      }
-   }
    element ready_bit_from_hps
    {
       datum _sortIndex
       {
-         value = "9";
+         value = "6";
          type = "int";
       }
    }
@@ -166,27 +142,11 @@
          type = "String";
       }
    }
-   element reg32_avalon_interface_0
-   {
-      datum _sortIndex
-      {
-         value = "6";
-         type = "int";
-      }
-   }
-   element reg32_avalon_interface_0.avalon_slave_0
-   {
-      datum baseAddress
-      {
-         value = "72";
-         type = "String";
-      }
-   }
    element sdram_master_0
    {
       datum _sortIndex
       {
-         value = "8";
+         value = "5";
          type = "int";
       }
    }
@@ -212,7 +172,7 @@
  <parameter name="hideFromIPCatalog" value="false" />
  <parameter name="lockedInterfaceDefinition" value="" />
  <parameter name="maxAdditionalLatency" value="1" />
- <parameter name="projectName" value="lab1.qpf" />
+ <parameter name="projectName" value="lab3_part2.qpf" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="0" />
  <parameter name="testBenchDutName" value="" />
@@ -224,17 +184,7 @@
    internal="done_bit_to_hps.external_connection"
    type="conduit"
    dir="end" />
- <interface
-   name="hex5_0bus"
-   internal="hex5_hex0.external_connection"
-   type="conduit"
-   dir="end" />
  <interface name="memory" internal="hps_0.memory" type="conduit" dir="end" />
- <interface
-   name="pushbuttons"
-   internal="pushbuttons.external_connection"
-   type="conduit"
-   dir="end" />
  <interface
    name="ready_bit"
    internal="ready_bit_from_hps.external_connection"
@@ -245,9 +195,15 @@
    internal="sys_clk.sdram_clk"
    type="clock"
    dir="start" />
+ <interface name="sdram_master_0_conduit" internal="sdram_master_0.CONDUIT" />
  <interface
-   name="sdram_master_0_conduit"
-   internal="sdram_master_0.CONDUIT"
+   name="sdram_master_0_control"
+   internal="sdram_master_0.control"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="sdram_master_0_debug"
+   internal="sdram_master_0.debug"
    type="conduit"
    dir="end" />
  <interface name="sdram_wire" internal="SDRAM.wire" type="conduit" dir="end" />
@@ -260,11 +216,6 @@
    name="system_ref_reset"
    internal="sys_clk.ref_reset"
    type="reset"
-   dir="end" />
- <interface
-   name="to_hex_to_led"
-   internal="reg32_avalon_interface_0.conduit_end"
-   type="conduit"
    dir="end" />
  <module
    name="SDRAM"
@@ -312,20 +263,6 @@
   <parameter name="simDoTestBenchWiring" value="true" />
   <parameter name="simDrivenValue" value="0" />
   <parameter name="width" value="1" />
- </module>
- <module name="hex5_hex0" kind="altera_avalon_pio" version="15.0" enabled="1">
-  <parameter name="bitClearingEdgeCapReg" value="false" />
-  <parameter name="bitModifyingOutReg" value="false" />
-  <parameter name="captureEdge" value="false" />
-  <parameter name="clockRate" value="50000000" />
-  <parameter name="direction" value="Output" />
-  <parameter name="edgeType" value="RISING" />
-  <parameter name="generateIRQ" value="false" />
-  <parameter name="irqType" value="LEVEL" />
-  <parameter name="resetValue" value="0" />
-  <parameter name="simDoTestBenchWiring" value="false" />
-  <parameter name="simDrivenValue" value="0" />
-  <parameter name="width" value="32" />
  </module>
  <module name="hps_0" kind="altera_hps" version="15.0" enabled="1">
   <parameter name="ABSTRACT_REAL_COMPARE_TEST" value="false" />
@@ -902,24 +839,6 @@
   <parameter name="writable" value="true" />
  </module>
  <module
-   name="pushbuttons"
-   kind="altera_avalon_pio"
-   version="15.0"
-   enabled="1">
-  <parameter name="bitClearingEdgeCapReg" value="true" />
-  <parameter name="bitModifyingOutReg" value="false" />
-  <parameter name="captureEdge" value="true" />
-  <parameter name="clockRate" value="50000000" />
-  <parameter name="direction" value="Input" />
-  <parameter name="edgeType" value="FALLING" />
-  <parameter name="generateIRQ" value="true" />
-  <parameter name="irqType" value="EDGE" />
-  <parameter name="resetValue" value="0" />
-  <parameter name="simDoTestBenchWiring" value="true" />
-  <parameter name="simDrivenValue" value="0" />
-  <parameter name="width" value="3" />
- </module>
- <module
    name="ready_bit_from_hps"
    kind="altera_avalon_pio"
    version="15.0"
@@ -937,11 +856,6 @@
   <parameter name="simDrivenValue" value="0" />
   <parameter name="width" value="1" />
  </module>
- <module
-   name="reg32_avalon_interface_0"
-   kind="reg32_avalon_interface"
-   version="1.0"
-   enabled="1" />
  <module name="sdram_master_0" kind="sdram_master" version="1.0" enabled="1" />
  <module
    name="sys_clk"
@@ -998,33 +912,6 @@
    kind="avalon"
    version="15.0"
    start="hps_0.h2f_lw_axi_master"
-   end="reg32_avalon_interface_0.avalon_slave_0">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0048" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="15.0"
-   start="hps_0.h2f_lw_axi_master"
-   end="hex5_hex0.s1">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0030" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="15.0"
-   start="hps_0.h2f_lw_axi_master"
-   end="pushbuttons.s1">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0020" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="15.0"
-   start="hps_0.h2f_lw_axi_master"
    end="ready_bit_from_hps.s1">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0010" />
@@ -1044,16 +931,6 @@
    version="15.0"
    start="sys_clk.sys_clk"
    end="jtag_uart_0.clk" />
- <connection
-   kind="clock"
-   version="15.0"
-   start="sys_clk.sys_clk"
-   end="hex5_hex0.clk" />
- <connection
-   kind="clock"
-   version="15.0"
-   start="sys_clk.sys_clk"
-   end="pushbuttons.clk" />
  <connection kind="clock" version="15.0" start="sys_clk.sys_clk" end="SDRAM.clk" />
  <connection
    kind="clock"
@@ -1070,11 +947,6 @@
    version="15.0"
    start="sys_clk.sys_clk"
    end="onchip_memory2_0.clk1" />
- <connection
-   kind="clock"
-   version="15.0"
-   start="sys_clk.sys_clk"
-   end="reg32_avalon_interface_0.clock" />
  <connection
    kind="clock"
    version="15.0"
@@ -1106,13 +978,6 @@
    kind="interrupt"
    version="15.0"
    start="hps_0.f2h_irq0"
-   end="pushbuttons.irq">
-  <parameter name="irqNumber" value="1" />
- </connection>
- <connection
-   kind="interrupt"
-   version="15.0"
-   start="hps_0.f2h_irq0"
    end="done_bit_to_hps.irq">
   <parameter name="irqNumber" value="0" />
  </connection>
@@ -1121,22 +986,7 @@
    version="15.0"
    start="hps_0.h2f_reset"
    end="jtag_uart_0.reset" />
- <connection
-   kind="reset"
-   version="15.0"
-   start="hps_0.h2f_reset"
-   end="hex5_hex0.reset" />
- <connection
-   kind="reset"
-   version="15.0"
-   start="hps_0.h2f_reset"
-   end="pushbuttons.reset" />
  <connection kind="reset" version="15.0" start="hps_0.h2f_reset" end="SDRAM.reset" />
- <connection
-   kind="reset"
-   version="15.0"
-   start="hps_0.h2f_reset"
-   end="reg32_avalon_interface_0.reset" />
  <connection
    kind="reset"
    version="15.0"
@@ -1161,22 +1011,7 @@
    kind="reset"
    version="15.0"
    start="sys_clk.reset_source"
-   end="pushbuttons.reset" />
- <connection
-   kind="reset"
-   version="15.0"
-   start="sys_clk.reset_source"
-   end="hex5_hex0.reset" />
- <connection
-   kind="reset"
-   version="15.0"
-   start="sys_clk.reset_source"
    end="jtag_uart_0.reset" />
- <connection
-   kind="reset"
-   version="15.0"
-   start="sys_clk.reset_source"
-   end="reg32_avalon_interface_0.reset" />
  <connection
    kind="reset"
    version="15.0"

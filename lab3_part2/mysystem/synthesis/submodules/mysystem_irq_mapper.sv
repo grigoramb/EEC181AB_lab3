@@ -11,18 +11,18 @@
 // agreement for further details.
 
 
-// $Id: //acds/rel/15.1/ip/merlin/altera_irq_mapper/altera_irq_mapper.sv.terp#1 $
+// $Id: //acds/rel/15.0/ip/merlin/altera_irq_mapper/altera_irq_mapper.sv.terp#1 $
 // $Revision: #1 $
-// $Date: 2015/08/09 $
+// $Date: 2015/02/08 $
 // $Author: swbranch $
 
 // -------------------------------------------------------
 // Altera IRQ Mapper
 //
 // Parameters
-//   NUM_RCVRS        : 1
+//   NUM_RCVRS        : 2
 //   SENDER_IRW_WIDTH : 32
-//   IRQ_MAP          : 0:8
+//   IRQ_MAP          : 0:8,1:0
 //
 // -------------------------------------------------------
 
@@ -40,6 +40,7 @@ module mysystem_irq_mapper
     // IRQ Receivers
     // -------------------
     input                receiver0_irq,
+    input                receiver1_irq,
 
     // -------------------
     // Command Source (Output)
@@ -52,6 +53,7 @@ module mysystem_irq_mapper
 	sender_irq = 0;
 
         sender_irq[8] = receiver0_irq;
+        sender_irq[0] = receiver1_irq;
     end
 
 endmodule

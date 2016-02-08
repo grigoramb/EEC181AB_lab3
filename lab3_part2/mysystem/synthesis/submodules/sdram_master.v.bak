@@ -1,0 +1,93 @@
+`define SDRAM_BASE 32'hC4000000
+`define RDY_ADR  32'hC4000028
+`define SECOND 32'd50000000 // 50 million clock cycles = 1 second
+
+module sdram_master (
+input clk,
+output reg read_n = 1,
+output reg write_n = 1,
+output reg chipselect,
+input waitrequest,
+output reg [31:0] address = 0,
+output reg [1:0] byteenable,
+input readdatavalid,
+input [15:0] readdata,
+output reg [15:0] writedata,
+input reset_n,
+// conduits for debuggings
+output [31:0] maxmin
+);
+
+assign maxmin = {max,min};
+
+reg [15:0] max;		// current max val
+reg [15:0] min;		// curent min val
+
+reg [31:0] timer;		// number of cycles since last poll
+reg [3:0] reading; 	// current number reading (index in array)
+
+
+always @(posedge clk or negedge reset_n) begin
+	if(~reset_n | reading == 14) begin
+		timer <= 0;					// reset timer
+		write_n <= 1;				// disable write
+		read_n <= 1;				// disable read
+		writedata <= 16'd0;		// data is 0
+		byteenable <= 2'd0;		// byteenable 0
+		address <= `RDY_ADR; 	// address of ready bit
+		chipselect <= 0;			// don't select chip
+		reading <= 4'b0;			// not reading data yet
+		max <= 16'h0;				// current max value set to a minimum
+		min <= 16'hFFFF;			// current min value set to a maximum
+	end
+	else begin
+		if(reading == 12) begin // write min
+			read_n <= 1;		// disable read
+			write_n <= 0;		// enable write
+			address <= `SDRAM_BASE + 2;  // Addr of min 
+			writedata <= min;
+			reading <= !waitrequest ? 13 : 12;
+		end
+		else if(reading == 13) begin // write max
+			read_n <= 1;		// disable read
+			write_n <= 0;		// enable write
+			address <= `SDRAM_BASE + 4;  // Addr of max
+			writedata <= max;		
+			reading <= !waitrequest ? 14 : 13; // reset when done
+		end
+		else if(reading) begin  // reading the array
+			read_n <= 0; 				// enable read
+			chipselect <= 1;			// enable chip
+			byteenable <= 2'b11;		// enable both bytes
+			// if read data is valid and smaller, update min
+			min <= ( (min <= readdata) & readdatavalid ) ? min : readdata;
+			// if read data is valid and larger, update max
+			max <= ( (max >= readdata) & readdatavalid ) ? max : readdata;
+			address <= `SDRAM_BASE + 2*reading;
+			reading <= (!waitrequest) ? reading + 1: reading;
+		end
+		else begin // polling the ready bit
+			if(timer >= `SECOND) begin // a second has passed since last read 
+				timer <= 0;					// reset timer
+				read_n <= 0;				// enable read
+				write_n <= 1;
+				address <= `RDY_ADR;		// read from ready bit
+				byteenable <= 2'b11;		// enable read
+				chipselect <= 1;			// enable read
+				reading <= 0;				// not reading yet
+			end
+			else begin 
+				timer <= timer + 1;			// increment timer 						
+				address <= waitrequest ? `RDY_ADR : `SDRAM_BASE;	// prepare to read from array
+				read_n <= waitrequest ? read_n : 1; 				// disable read when RAM starts reading
+				byteenable <= waitrequest ? byteenable : 2'b0;	// ^^^
+				chipselect <= waitrequest ? chipselect : 0;		// ^^^
+				reading[0] <= readdatavalid & readdata[0];			// we got the RDY_BIT, set index to 1
+			end
+		end
+	end
+end
+
+
+
+endmodule
