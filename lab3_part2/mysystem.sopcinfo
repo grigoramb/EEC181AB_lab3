@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EnsembleReport name="mysystem" kind="mysystem" version="1.0" fabric="QSYS">
  <!-- Format version 15.0 145 (Future versions may contain additional information.) -->
- <!-- 2016.02.07.00:53:23 -->
+ <!-- 2016.02.08.16:38:37 -->
  <!-- A collection of modules and connections -->
  <parameter name="AUTO_GENERATION_ID">
   <type>java.lang.Integer</type>
-  <value>1454835201</value>
+  <value>1454978315</value>
   <derived>false</derived>
   <enabled>true</enabled>
   <visible>false</visible>
@@ -76650,18 +76650,6 @@ parameters are a RESULT of the module parameters. -->
     <direction>Output</direction>
     <width>2</width>
     <role>state_out</role>
-   </port>
-   <port>
-    <name>test_rd_wr</name>
-    <direction>Input</direction>
-    <width>1</width>
-    <role>test_rd_wr_in</role>
-   </port>
-   <port>
-    <name>read_index</name>
-    <direction>Input</direction>
-    <width>4</width>
-    <role>read_index_in</role>
    </port>
   </interface>
  </module>

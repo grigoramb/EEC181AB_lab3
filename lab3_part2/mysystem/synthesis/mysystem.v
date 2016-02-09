@@ -4,43 +4,41 @@
 
 `timescale 1 ps / 1 ps
 module mysystem (
-		input  wire        done_bit_export,                    //               done_bit.export
-		output wire [12:0] memory_mem_a,                       //                 memory.mem_a
-		output wire [2:0]  memory_mem_ba,                      //                       .mem_ba
-		output wire        memory_mem_ck,                      //                       .mem_ck
-		output wire        memory_mem_ck_n,                    //                       .mem_ck_n
-		output wire        memory_mem_cke,                     //                       .mem_cke
-		output wire        memory_mem_cs_n,                    //                       .mem_cs_n
-		output wire        memory_mem_ras_n,                   //                       .mem_ras_n
-		output wire        memory_mem_cas_n,                   //                       .mem_cas_n
-		output wire        memory_mem_we_n,                    //                       .mem_we_n
-		output wire        memory_mem_reset_n,                 //                       .mem_reset_n
-		inout  wire [7:0]  memory_mem_dq,                      //                       .mem_dq
-		inout  wire        memory_mem_dqs,                     //                       .mem_dqs
-		inout  wire        memory_mem_dqs_n,                   //                       .mem_dqs_n
-		output wire        memory_mem_odt,                     //                       .mem_odt
-		output wire        memory_mem_dm,                      //                       .mem_dm
-		input  wire        memory_oct_rzqin,                   //                       .oct_rzqin
-		output wire        ready_bit_export,                   //              ready_bit.export
-		output wire        sdram_clk_clk,                      //              sdram_clk.clk
-		output wire        sdram_master_0_control_done_out,    // sdram_master_0_control.done_out
-		input  wire        sdram_master_0_control_ready_in,    //                       .ready_in
-		output wire [15:0] sdram_master_0_debug_max_out,       //   sdram_master_0_debug.max_out
-		output wire [15:0] sdram_master_0_debug_min_out,       //                       .min_out
-		output wire [1:0]  sdram_master_0_debug_state_out,     //                       .state_out
-		input  wire        sdram_master_0_debug_test_rd_wr_in, //                       .test_rd_wr_in
-		input  wire [3:0]  sdram_master_0_debug_read_index_in, //                       .read_index_in
-		output wire [12:0] sdram_wire_addr,                    //             sdram_wire.addr
-		output wire [1:0]  sdram_wire_ba,                      //                       .ba
-		output wire        sdram_wire_cas_n,                   //                       .cas_n
-		output wire        sdram_wire_cke,                     //                       .cke
-		output wire        sdram_wire_cs_n,                    //                       .cs_n
-		inout  wire [15:0] sdram_wire_dq,                      //                       .dq
-		output wire [1:0]  sdram_wire_dqm,                     //                       .dqm
-		output wire        sdram_wire_ras_n,                   //                       .ras_n
-		output wire        sdram_wire_we_n,                    //                       .we_n
-		input  wire        system_ref_clk_clk,                 //         system_ref_clk.clk
-		input  wire        system_ref_reset_reset              //       system_ref_reset.reset
+		input  wire        done_bit_export,                 //               done_bit.export
+		output wire [12:0] memory_mem_a,                    //                 memory.mem_a
+		output wire [2:0]  memory_mem_ba,                   //                       .mem_ba
+		output wire        memory_mem_ck,                   //                       .mem_ck
+		output wire        memory_mem_ck_n,                 //                       .mem_ck_n
+		output wire        memory_mem_cke,                  //                       .mem_cke
+		output wire        memory_mem_cs_n,                 //                       .mem_cs_n
+		output wire        memory_mem_ras_n,                //                       .mem_ras_n
+		output wire        memory_mem_cas_n,                //                       .mem_cas_n
+		output wire        memory_mem_we_n,                 //                       .mem_we_n
+		output wire        memory_mem_reset_n,              //                       .mem_reset_n
+		inout  wire [7:0]  memory_mem_dq,                   //                       .mem_dq
+		inout  wire        memory_mem_dqs,                  //                       .mem_dqs
+		inout  wire        memory_mem_dqs_n,                //                       .mem_dqs_n
+		output wire        memory_mem_odt,                  //                       .mem_odt
+		output wire        memory_mem_dm,                   //                       .mem_dm
+		input  wire        memory_oct_rzqin,                //                       .oct_rzqin
+		output wire        ready_bit_export,                //              ready_bit.export
+		output wire        sdram_clk_clk,                   //              sdram_clk.clk
+		output wire        sdram_master_0_control_done_out, // sdram_master_0_control.done_out
+		input  wire        sdram_master_0_control_ready_in, //                       .ready_in
+		output wire [15:0] sdram_master_0_debug_max_out,    //   sdram_master_0_debug.max_out
+		output wire [15:0] sdram_master_0_debug_min_out,    //                       .min_out
+		output wire [1:0]  sdram_master_0_debug_state_out,  //                       .state_out
+		output wire [12:0] sdram_wire_addr,                 //             sdram_wire.addr
+		output wire [1:0]  sdram_wire_ba,                   //                       .ba
+		output wire        sdram_wire_cas_n,                //                       .cas_n
+		output wire        sdram_wire_cke,                  //                       .cke
+		output wire        sdram_wire_cs_n,                 //                       .cs_n
+		inout  wire [15:0] sdram_wire_dq,                   //                       .dq
+		output wire [1:0]  sdram_wire_dqm,                  //                       .dqm
+		output wire        sdram_wire_ras_n,                //                       .ras_n
+		output wire        sdram_wire_we_n,                 //                       .we_n
+		input  wire        system_ref_clk_clk,              //         system_ref_clk.clk
+		input  wire        system_ref_reset_reset           //       system_ref_reset.reset
 	);
 
 	wire          sys_clk_sys_clk_clk;                                         // sys_clk:sys_clk_clk -> [SDRAM:clk, done_bit_to_hps:clk, hps_0:f2h_axi_clk, hps_0:h2f_axi_clk, hps_0:h2f_lw_axi_clk, jtag_uart_0:clk, mm_interconnect_0:sys_clk_sys_clk_clk, mm_interconnect_1:sys_clk_sys_clk_clk, onchip_memory2_0:clk, ready_bit_from_hps:clk, rst_controller:clk, rst_controller_001:clk, sdram_master_0:clk]
@@ -394,9 +392,7 @@ module mysystem (
 		.ready         (sdram_master_0_control_ready_in),            //              .ready_in
 		.max           (sdram_master_0_debug_max_out),               //         debug.max_out
 		.min           (sdram_master_0_debug_min_out),               //              .min_out
-		.state         (sdram_master_0_debug_state_out),             //              .state_out
-		.test_rd_wr    (sdram_master_0_debug_test_rd_wr_in),         //              .test_rd_wr_in
-		.read_index    (sdram_master_0_debug_read_index_in)          //              .read_index_in
+		.state         (sdram_master_0_debug_state_out)              //              .state_out
 	);
 
 	mysystem_sys_clk sys_clk (

@@ -40,11 +40,11 @@
    type="SYSTEM_VERILOG"
    library="border" />
  <file
-   path="simulation/submodules/mysystem_Arm_A9_HPS_hps_io_border_memory.sv"
+   path="simulation/submodules/mysystem_hps_0_hps_io_border_memory.sv"
    type="SYSTEM_VERILOG"
    library="border" />
  <file
-   path="simulation/submodules/mysystem_Arm_A9_HPS_hps_io_border.sv"
+   path="simulation/submodules/mysystem_hps_0_hps_io_border.sv"
    type="SYSTEM_VERILOG"
    library="border" />
  <file
@@ -90,15 +90,15 @@
  <file
    path="simulation/submodules/altera_merlin_width_adapter.sv"
    type="SYSTEM_VERILOG"
-   library="Arm_A9_HPS_h2f_axi_master_wr_to_SDRAM_s1_cmd_width_adapter" />
+   library="hps_0_h2f_axi_master_wr_to_SDRAM_s1_cmd_width_adapter" />
  <file
    path="simulation/submodules/altera_merlin_address_alignment.sv"
    type="SYSTEM_VERILOG"
-   library="Arm_A9_HPS_h2f_axi_master_wr_to_SDRAM_s1_cmd_width_adapter" />
+   library="hps_0_h2f_axi_master_wr_to_SDRAM_s1_cmd_width_adapter" />
  <file
    path="simulation/submodules/altera_merlin_burst_uncompressor.sv"
    type="SYSTEM_VERILOG"
-   library="Arm_A9_HPS_h2f_axi_master_wr_to_SDRAM_s1_cmd_width_adapter" />
+   library="hps_0_h2f_axi_master_wr_to_SDRAM_s1_cmd_width_adapter" />
  <file
    path="simulation/submodules/altera_merlin_arbitrator.sv"
    type="SYSTEM_VERILOG"
@@ -190,19 +190,19 @@
  <file
    path="simulation/submodules/altera_merlin_traffic_limiter.sv"
    type="SYSTEM_VERILOG"
-   library="Arm_A9_HPS_h2f_axi_master_wr_limiter" />
+   library="hps_0_h2f_axi_master_wr_limiter" />
  <file
    path="simulation/submodules/altera_merlin_reorder_memory.sv"
    type="SYSTEM_VERILOG"
-   library="Arm_A9_HPS_h2f_axi_master_wr_limiter" />
+   library="hps_0_h2f_axi_master_wr_limiter" />
  <file
    path="simulation/submodules/altera_avalon_sc_fifo.v"
    type="SYSTEM_VERILOG"
-   library="Arm_A9_HPS_h2f_axi_master_wr_limiter" />
+   library="hps_0_h2f_axi_master_wr_limiter" />
  <file
    path="simulation/submodules/altera_avalon_st_pipeline_base.v"
    type="SYSTEM_VERILOG"
-   library="Arm_A9_HPS_h2f_axi_master_wr_limiter" />
+   library="hps_0_h2f_axi_master_wr_limiter" />
  <file
    path="simulation/submodules/mysystem_mm_interconnect_0_router_004.sv"
    type="SYSTEM_VERILOG"
@@ -238,11 +238,11 @@
  <file
    path="simulation/submodules/altera_merlin_axi_master_ni.sv"
    type="SYSTEM_VERILOG"
-   library="Arm_A9_HPS_h2f_axi_master_agent" />
+   library="hps_0_h2f_axi_master_agent" />
  <file
    path="simulation/submodules/altera_merlin_address_alignment.sv"
    type="SYSTEM_VERILOG"
-   library="Arm_A9_HPS_h2f_axi_master_agent" />
+   library="hps_0_h2f_axi_master_agent" />
  <file
    path="simulation/submodules/altera_merlin_slave_translator.sv"
    type="SYSTEM_VERILOG"
@@ -252,7 +252,15 @@
    type="SYSTEM_VERILOG"
    library="sdram_master_0_avalon_master_translator" />
  <file
-   path="simulation/submodules/mysystem_Arm_A9_HPS_hps_io.v"
+   path="simulation/submodules/altera_up_avalon_reset_from_locked_signal.v"
+   type="VERILOG"
+   library="reset_from_locked" />
+ <file
+   path="simulation/submodules/mysystem_sys_clk_sys_pll.vo"
+   type="VERILOG"
+   library="sys_pll" />
+ <file
+   path="simulation/submodules/mysystem_hps_0_hps_io.v"
    type="VERILOG"
    library="hps_io" />
  <file
@@ -288,11 +296,7 @@
    type="SYSTEM_VERILOG"
    library="fpga_interfaces" />
  <file
-   path="simulation/submodules/mysystem_Arm_A9_HPS_fpga_interfaces_h2f_mpu_events.sv"
-   type="SYSTEM_VERILOG"
-   library="fpga_interfaces" />
- <file
-   path="simulation/submodules/mysystem_Arm_A9_HPS_fpga_interfaces.sv"
+   path="simulation/submodules/mysystem_hps_0_fpga_interfaces.sv"
    type="SYSTEM_VERILOG"
    library="fpga_interfaces" />
  <file
@@ -324,21 +328,37 @@
    type="VERILOG"
    library="mm_interconnect_0" />
  <file
-   path="simulation/submodules/mysystem_system_console.v"
+   path="simulation/submodules/mysystem_sys_clk.v"
    type="VERILOG"
-   library="system_console" />
+   library="sys_clk" />
  <file
    path="simulation/submodules/sdram_master.v"
    type="VERILOG"
    library="sdram_master_0" />
  <file
-   path="simulation/submodules/mysystem_ram.hex"
-   type="HEX"
-   library="ram" />
- <file
-   path="simulation/submodules/mysystem_ram.v"
+   path="simulation/submodules/mysystem_ready_bit_from_hps.v"
    type="VERILOG"
-   library="ram" />
+   library="ready_bit_from_hps" />
+ <file
+   path="simulation/submodules/mysystem_onchip_memory2_0.v"
+   type="VERILOG"
+   library="onchip_memory2_0" />
+ <file
+   path="simulation/submodules/mysystem_onchip_memory2_0.hex"
+   type="HEX"
+   library="onchip_memory2_0" />
+ <file
+   path="simulation/submodules/mysystem_jtag_uart_0.v"
+   type="VERILOG"
+   library="jtag_uart_0" />
+ <file
+   path="simulation/submodules/mysystem_hps_0.v"
+   type="VERILOG"
+   library="hps_0" />
+ <file
+   path="simulation/submodules/mysystem_done_bit_to_hps.v"
+   type="VERILOG"
+   library="done_bit_to_hps" />
  <file
    path="simulation/submodules/mysystem_SDRAM_test_component.v"
    type="VERILOG"
@@ -347,19 +367,17 @@
    path="simulation/submodules/mysystem_SDRAM.v"
    type="VERILOG"
    library="SDRAM" />
- <file
-   path="simulation/submodules/mysystem_Arm_A9_HPS.v"
-   type="VERILOG"
-   library="Arm_A9_HPS" />
  <file path="simulation/mysystem.v" type="VERILOG" />
  <topLevel name="mysystem" />
  <deviceFamily name="cyclonev" />
- <modelMap controllerPath="mysystem.Arm_A9_HPS" modelPath="mysystem.Arm_A9_HPS" />
+ <modelMap controllerPath="mysystem.hps_0" modelPath="mysystem.hps_0" />
  <modelMap
-   controllerPath="mysystem.Arm_A9_HPS.fpga_interfaces"
-   modelPath="mysystem.Arm_A9_HPS.fpga_interfaces" />
+   controllerPath="mysystem.hps_0.fpga_interfaces"
+   modelPath="mysystem.hps_0.fpga_interfaces" />
  <modelMap
-   controllerPath="mysystem.Arm_A9_HPS.hps_io"
-   modelPath="mysystem.Arm_A9_HPS.hps_io" />
- <modelMap controllerPath="mysystem.ram" modelPath="mysystem.ram" />
+   controllerPath="mysystem.hps_0.hps_io"
+   modelPath="mysystem.hps_0.hps_io" />
+ <modelMap
+   controllerPath="mysystem.onchip_memory2_0"
+   modelPath="mysystem.onchip_memory2_0" />
 </simPackage>
