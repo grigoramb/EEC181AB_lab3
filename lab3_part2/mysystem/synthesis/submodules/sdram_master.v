@@ -49,7 +49,7 @@ begin
 		`READ: state <= ((read_index==10) & (numread==10)) ? `DONE : `READ;
 //		`WRITE: state <= (write_index==2) ? `WRITE : `DONE;
 		`DONE: state <= `DONE;
-		default: state <= state;
+		default: state <= `IDLE;
 		endcase
 	end
 end

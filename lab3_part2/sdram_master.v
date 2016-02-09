@@ -49,7 +49,7 @@ begin
 		`READ: state <= ((read_index==10) & (numread==10)) ? `DONE : `READ;
 //		`WRITE: state <= (write_index==2) ? `WRITE : `DONE;
 		`DONE: state <= `DONE;
-		default: state <= state;
+		default: state <= `IDLE;
 		endcase
 	end
 end
@@ -61,9 +61,16 @@ always @(posedge clk) begin
         numread <= 0;       
     end
     else begin
-        min <= (readdatavalid & (readdata < min)) ? readdata : min; // if new number valid and smaller
-        max <= (readdatavalid & (readdata > max)) ? readdata : max; // if new number valid and larger
-        numread <= readdatavalid ? numread+1 : numread;             // increment as each number is read
+        if(state == `READ) begin
+            min <= (readdatavalid & (readdata < min)) ? readdata : min; // if new number valid and smaller
+            max <= (readdatavalid & (readdata > max)) ? readdata : max; // if new number valid and larger
+            numread <= readdatavalid ? numread+1 : numread;             // increment as each number is read
+        end
+        else begin
+            min <= min;
+            max <= max;
+            numread <= 0;
+        end
     end
 end
 
@@ -72,13 +79,12 @@ always @(posedge clk) begin
         read_index <= 0;
     end
     else begin
-        read_index <= (~waitrequest & (read_index<10))? read_index + 1 : read_index;
+        read_index <= ((state==`READ) & ~waitrequest & (read_index<10))? read_index + 1 : read_index;
     end
 end
 
 always @(posedge clk) begin
 	if(~reset_n) begin
-		counter <= 0;
 		write_n <= 1;
 		address <= 0;
 		writedata <= 16'hF00D;
@@ -87,7 +93,6 @@ always @(posedge clk) begin
 		case (state)
 		`IDLE:
 			begin
-				counter <= counter + 1;
 				write_n <= 1;
 				address <= 0;
 				writedata = 16'hABCD;
@@ -100,7 +105,7 @@ always @(posedge clk) begin
 			end
 		`READ:
 			begin
-				read_n <= (read_index < 10) ? 0 : 1;
+				read_n <= (address < 9) ? 0 : 1;
 				address <= read_index;
 				write_n <= 1;
 				writedata <= 16'hEEEE; // to make sure it doesn't write
