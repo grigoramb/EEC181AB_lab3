@@ -47,16 +47,16 @@ begin
 		case (state)
 		`IDLE: state <= ready ? `READ : `IDLE; 
 //		`READ: state <= ((read_index==10) & (numread==10)) ? `DONE : `READ;
-		`READ: state <= ((address==10) & (numread==10)) ? `DONE : `READ;
-//		`WRITE: state <= (write_index==2) ? `WRITE : `DONE;
-		`DONE: state <= `DONE;
+		`READ: state <= ((address == 10) & (numread==10)) ? `WRITE : `READ;
+		`WRITE: state <= (address == 2) ? `WRITE : `DONE;
+		`DONE: state <= ~ready ? `IDLE : `DONE;
 		default: state <= `IDLE;
 		endcase
 	end
 end
 
 always @(posedge clk) begin
-    if(~reset_n) begin
+    if(~reset_n | state==`IDLE) begin
         min <= 16'hFFFF;
         max <= 16'h0000;
         numread <= 0;       
@@ -76,7 +76,7 @@ always @(posedge clk) begin
 end
 
 always @(posedge clk) begin
-    if(~reset_n) begin
+    if(~reset_n | state==`IDLE) begin
         read_index <= 0;
     end
     else begin
@@ -85,7 +85,7 @@ always @(posedge clk) begin
 end
 
 always @(posedge clk) begin
-	if(~reset_n) begin
+	if(~reset_n | state == `IDLE) begin
 		write_n <= 1;
 		address <= 0;
 		writedata <= 16'hF00D;
@@ -100,13 +100,20 @@ always @(posedge clk) begin
 			end	
 		`WRITE: 
 			begin
-				write_n <= 0;
-				address <= 0;		
-				writedata = 16'hBCDE;
+				write_n <= (address < 1) ? 0 : 1;
+                if(address==10) begin // just got here from READ state
+                    address <= 0;
+				    writedata <= min;
+                end
+                else begin
+                    address <= ~waitrequest & (address<2) ? address + 1: address;
+				    writedata <= ~waitrequest & (address<2) ? max : min;
+                end
+				address <= (address == 10) ?  0 : 1;		
 			end
 		`READ:
 			begin
-				read_n <= (address < 9) ? 0 : 1;
+				read_n <= (address < 10) ? 0 : 1;
 				// address <= read_index;
                 address <= ~waitrequest & (address<10) ? address + 1 : address;
 				write_n <= 1;
