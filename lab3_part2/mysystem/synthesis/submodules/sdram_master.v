@@ -46,7 +46,8 @@ begin
 	else begin
 		case (state)
 		`IDLE: state <= ready ? `READ : `IDLE; 
-		`READ: state <= ((read_index==10) & (numread==10)) ? `DONE : `READ;
+//		`READ: state <= ((read_index==10) & (numread==10)) ? `DONE : `READ;
+		`READ: state <= ((address==10) & (numread==10)) ? `DONE : `READ;
 //		`WRITE: state <= (write_index==2) ? `WRITE : `DONE;
 		`DONE: state <= `DONE;
 		default: state <= `IDLE;
@@ -64,7 +65,7 @@ always @(posedge clk) begin
         if(state == `READ) begin
             min <= (readdatavalid & (readdata < min)) ? readdata : min; // if new number valid and smaller
             max <= (readdatavalid & (readdata > max)) ? readdata : max; // if new number valid and larger
-            numread <= readdatavalid ? numread+1 : numread;             // increment as each number is read
+            numread <= readdatavalid & (numread < 10) ? numread+1 : numread;             // increment as each number is read
         end
         else begin
             min <= min;
@@ -106,7 +107,8 @@ always @(posedge clk) begin
 		`READ:
 			begin
 				read_n <= (address < 9) ? 0 : 1;
-				address <= read_index;
+				// address <= read_index;
+                address <= ~waitrequest & (address<10) ? address + 1 : address;
 				write_n <= 1;
 				writedata <= 16'hEEEE; // to make sure it doesn't write
 			end
