@@ -29,14 +29,11 @@ static inline void initCounters ()
 
 int main(void)
 {
-  volatile uint32_t * FPGA_onchip = (uint32_t *) 0xC0000000;
-  volatile uint32_t * FPGA_SDRAM = (uint32_t *) 0xC4000000;
-  volatile uint32_t * HPS_onchip = (uint32_t *) 0xFFFF0000;
-  volatile uint32_t * HPS_SDRAM = (uint32_t *) 0x00100000;
+  volatile uint32_t * FPGA_SDRAM = (uint32_t *) 0xC0000000;
   
   volatile uint32_t * ready_BUTTON = (uint32_t *) 0xFF200010;
   volatile uint32_t * done_LIGHT = (uint32_t *) 0xFF200000;
-  
+    
 
 
   volatile short * RDYBIT = (short *) 0xC4000028;
@@ -56,12 +53,20 @@ int main(void)
     while(count--){
       scanf("%d", &i);
       fflush(stdin);
-      *(ptr++) = i;
+      if(count % 2){
+        *ptr = i;
+      }
+      else{
+        *ptr |= i << 16;
+        *(ptr++);
+      }
     }
     *ready_BUTTON = 1;
     while(!(*done_LIGHT));
     *ready_BUTTON = 0;
     printf("Min and max should be there!\n"); 
+    printf("Min: %d\n", (*ptr++)>>16);
+    printf("Max: %d\n", (*ptr) & 0xFFFF);
     printf("Please press the any key to continue\n");
     scanf("%d", &i);
     fflush(stdin);

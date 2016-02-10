@@ -1,12 +1,12 @@
-# system info mysystem on 2016.02.08.21:31:45
+# system info mysystem on 2016.02.09.17:17:53
 system_info:
 name,value
 DEVICE,5CSEMA5F31C6
 DEVICE_FAMILY,Cyclone V
-GENERATION_ID,1454995865
+GENERATION_ID,1455067035
 #
 #
-# Files generated for mysystem on 2016.02.08.21:31:45
+# Files generated for mysystem on 2016.02.09.17:17:53
 files:
 filepath,kind,attributes,module,is_top
 simulation/mysystem.v,VERILOG,,mysystem,true
@@ -15,8 +15,8 @@ simulation/submodules/mysystem_SDRAM.v,VERILOG,,mysystem_SDRAM,false
 simulation/submodules/mysystem_done_bit_to_hps.v,VERILOG,,mysystem_done_bit_to_hps,false
 simulation/submodules/mysystem_hps_0.v,VERILOG,,mysystem_hps_0,false
 simulation/submodules/mysystem_jtag_uart_0.v,VERILOG,,mysystem_jtag_uart_0,false
-simulation/submodules/mysystem_onchip_memory2_0.v,VERILOG,,mysystem_onchip_memory2_0,false
 simulation/submodules/mysystem_onchip_memory2_0.hex,HEX,,mysystem_onchip_memory2_0,false
+simulation/submodules/mysystem_onchip_memory2_0.v,VERILOG,,mysystem_onchip_memory2_0,false
 simulation/submodules/mysystem_ready_bit_from_hps.v,VERILOG,,mysystem_ready_bit_from_hps,false
 simulation/submodules/sdram_master.v,VERILOG,,sdram_master,false
 simulation/submodules/mysystem_sys_clk.v,VERILOG,,mysystem_sys_clk,false
