@@ -1,0 +1,110 @@
+`define SDRAM_BASE 32'h0
+`define SECOND 32'd50000000 // 50 million clock cycles = 1 second
+`define IDLE 0
+`define WRITE 1
+`define READ 2
+`define DONE 3
+
+module sdram_master (
+input clk,
+input reset_n,
+input waitrequest,
+input readdatavalid,
+input [15:0] readdata,
+output reg read_n = 1'b1,
+output reg write_n = 1'b1,
+output reg chipselect = 1'b1,
+output reg [31:0] address = `SDRAM_BASE,
+output reg [1:0] byteenable = 2'b11,
+output reg [15:0] writedata = 16'hBEEF,
+
+// control signals
+input ready,
+output reg done = 0,
+
+// debugging
+output reg [15:0] max = 16'h0000,
+output reg [15:0] min = 16'hFFFF,
+output reg [1:0] state = 2'b00,
+input test_rd_wr, // set to 1 to read, 0 to write
+input [3:0] read_index
+);
+
+reg [31:0] counter =0;
+
+always @(*) begin
+	byteenable <= 2'b11;
+	chipselect <= 1;
+end
+
+// STATE LOGIC
+always @(posedge clk)
+begin
+	if(~reset_n) begin
+		state <= `IDLE;
+	end
+	else begin
+		case (state)
+		`IDLE:
+			begin
+				if(counter > `SECOND) begin
+					state <= test_rd_wr ? `READ : `WRITE;
+				end
+				else begin
+					state <= `IDLE;
+				end
+			end
+		`WRITE: state <= (waitrequest) ? `WRITE : `DONE;
+		`READ: state <= (waitrequest) ? `READ : `DONE;
+		`DONE: state <= `DONE;
+		default: state <= state;
+		endcase
+	end
+end
+
+
+always @(posedge clk) begin
+	if(~reset_n) begin
+		counter <= 0;
+		write_n <= 1;
+		address <= 0;
+		writedata <= 16'hF00D;
+	end
+	else begin
+		case (state)
+		`IDLE:
+			begin
+				counter <= counter + 1;
+				write_n <= 1;
+				address <= 0;
+				writedata = 16'hABCD;
+			end	
+		`WRITE: 
+			begin
+				write_n <= 0;
+				address <= 0;		
+				writedata = 16'hBCDE;
+			end
+		`READ:
+			begin
+				read_n <= 0;
+				address <= read_index;
+				write_n <= 1;
+				writedata <= 16'hEEEE; // to make sure it doesn't write
+				min <= readdata;
+				max <= readdatavalid ? readdata : max;
+			end
+		`DONE:
+			begin	
+				read_n <= 1;
+				write_n <= 1;
+				address <= 0;
+				writedata = 16'hBEEF;
+				min <= readdata;
+				max <= readdatavalid ? readdata : max;
+			end
+		endcase
+	end
+end
+
+endmodule

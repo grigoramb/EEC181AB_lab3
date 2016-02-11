@@ -1,0 +1,23 @@
+module sdram_master (
+input clk,
+output reg read_n = 1,
+output reg write_n = 1,
+output reg chipselect,
+input waitrequest,
+output reg [31:0] address = 0,
+output reg [1:0] byteenable,
+input readdatavalid,
+input [15:0] readdata,
+output reg [15:0] writedata,
+input reset_n
+);
+
+
+
+always @(posedge clk or negedge reset_n) begin
+	
+
+end
+
+
+endmodule
