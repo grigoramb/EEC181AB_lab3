@@ -139,7 +139,7 @@ always @(posedge clk) begin
 		`READ:
 			begin
 				read_n <= (address < 10) ? 0 : 1;
-                		address <= ~waitrequest & (address<10) ? address + 1 : address;
+                address <= ~waitrequest & (address<10) ? address + 1 : address;
 				write_n <= 1;
 				writedata <= 16'hEEEE; // to make sure it doesn't write
 			end
