@@ -43,8 +43,8 @@
 //   ARBITRATION_SHARES:  1 1
 //   ARBITRATION_SCHEME   "no-arb"
 //   PIPELINE_ARB:        0
-//   PKT_TRANS_LOCK:      181 (arbitration locking enabled)
-//   ST_DATA_W:           236
+//   PKT_TRANS_LOCK:      180 (arbitration locking enabled)
+//   ST_DATA_W:           235
 //   ST_CHANNEL_W:        3
 // ------------------------------------------
 
@@ -54,14 +54,14 @@ module mysystem_mm_interconnect_0_rsp_mux
     // Sinks
     // ----------------------
     input                       sink0_valid,
-    input [236-1   : 0]  sink0_data,
+    input [235-1   : 0]  sink0_data,
     input [3-1: 0]  sink0_channel,
     input                       sink0_startofpacket,
     input                       sink0_endofpacket,
     output                      sink0_ready,
 
     input                       sink1_valid,
-    input [236-1   : 0]  sink1_data,
+    input [235-1   : 0]  sink1_data,
     input [3-1: 0]  sink1_channel,
     input                       sink1_startofpacket,
     input                       sink1_endofpacket,
@@ -72,7 +72,7 @@ module mysystem_mm_interconnect_0_rsp_mux
     // Source
     // ----------------------
     output                      src_valid,
-    output [236-1    : 0] src_data,
+    output [235-1    : 0] src_data,
     output [3-1 : 0] src_channel,
     output                      src_startofpacket,
     output                      src_endofpacket,
@@ -84,13 +84,13 @@ module mysystem_mm_interconnect_0_rsp_mux
     input clk,
     input reset
 );
-    localparam PAYLOAD_W        = 236 + 3 + 2;
+    localparam PAYLOAD_W        = 235 + 3 + 2;
     localparam NUM_INPUTS       = 2;
     localparam SHARE_COUNTER_W  = 1;
     localparam PIPELINE_ARB     = 0;
-    localparam ST_DATA_W        = 236;
+    localparam ST_DATA_W        = 235;
     localparam ST_CHANNEL_W     = 3;
-    localparam PKT_TRANS_LOCK   = 181;
+    localparam PKT_TRANS_LOCK   = 180;
 
     // ------------------------------------------
     // Signals
@@ -119,8 +119,8 @@ module mysystem_mm_interconnect_0_rsp_mux
     // ------------------------------------------
     reg [NUM_INPUTS - 1 : 0] lock;
     always @* begin
-      lock[0] = sink0_data[181];
-      lock[1] = sink1_data[181];
+      lock[0] = sink0_data[180];
+      lock[1] = sink1_data[180];
     end
 
     assign last_cycle = src_valid & src_ready & src_endofpacket & ~(|(lock & grant));

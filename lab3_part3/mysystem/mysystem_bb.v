@@ -1,6 +1,15 @@
 
 module mysystem (
+	average_to_hps_export,
+	control_done,
+	control_length,
+	control_readaddress,
+	control_ready,
+	control_state,
+	control_writeaddress,
+	control_average,
 	done_bit_export,
+	length_from_hps_export,
 	memory_mem_a,
 	memory_mem_ba,
 	memory_mem_ck,
@@ -19,12 +28,6 @@ module mysystem (
 	memory_oct_rzqin,
 	ready_bit_export,
 	sdram_clk_clk,
-	sdram_master_0_control_done_out,
-	sdram_master_0_control_ready_in,
-	sdram_master_0_control_length_in,
-	sdram_master_0_debug_max_out,
-	sdram_master_0_debug_min_out,
-	sdram_master_0_debug_state_out,
 	sdram_wire_addr,
 	sdram_wire_ba,
 	sdram_wire_cas_n,
@@ -36,9 +39,19 @@ module mysystem (
 	sdram_wire_we_n,
 	system_ref_clk_clk,
 	system_ref_reset_reset,
-	length_from_hps_export);	
+	readaddress_from_hps_export,
+	writeaddress_from_hps_export);	
 
+	input	[15:0]	average_to_hps_export;
+	output		control_done;
+	input	[6:0]	control_length;
+	input	[31:0]	control_readaddress;
+	input		control_ready;
+	output	[2:0]	control_state;
+	input	[31:0]	control_writeaddress;
+	output	[15:0]	control_average;
 	input		done_bit_export;
+	output	[6:0]	length_from_hps_export;
 	output	[12:0]	memory_mem_a;
 	output	[2:0]	memory_mem_ba;
 	output		memory_mem_ck;
@@ -57,12 +70,6 @@ module mysystem (
 	input		memory_oct_rzqin;
 	output		ready_bit_export;
 	output		sdram_clk_clk;
-	output		sdram_master_0_control_done_out;
-	input		sdram_master_0_control_ready_in;
-	input	[5:0]	sdram_master_0_control_length_in;
-	output	[15:0]	sdram_master_0_debug_max_out;
-	output	[15:0]	sdram_master_0_debug_min_out;
-	output	[2:0]	sdram_master_0_debug_state_out;
 	output	[12:0]	sdram_wire_addr;
 	output	[1:0]	sdram_wire_ba;
 	output		sdram_wire_cas_n;
@@ -74,5 +81,6 @@ module mysystem (
 	output		sdram_wire_we_n;
 	input		system_ref_clk_clk;
 	input		system_ref_reset_reset;
-	output	[5:0]	length_from_hps_export;
+	output	[31:0]	readaddress_from_hps_export;
+	output	[31:0]	writeaddress_from_hps_export;
 endmodule

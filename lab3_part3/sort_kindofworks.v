@@ -1,0 +1,998 @@
+`define SDRAM_BASE 32'h0
+`define IDLE 0      // wait for ready signal
+`define READ 1      // read in numbers and insert
+`define SORT1 2
+`define PREWRITE 3
+`define WRITE 4     // start writing and shifting data out
+`define DONE 5      // done, wait for ready to go to 0
+`define LEFT 0
+`define RIGHT 1
+`define A 0
+`define B 1
+
+module sort (
+input clk,
+input reset_n,
+input waitrequest,
+input readdatavalid,
+input [15:0] readdata,
+output reg read_n = 1'b1,
+output reg write_n = 1'b1,
+output reg chipselect = 1'b1,
+output reg [31:0] address = `SDRAM_BASE,
+input [31:0] readaddress,
+input [31:0] writeaddress,
+
+output reg [1:0] byteenable = 2'b11,
+output reg [15:0] writedata = 16'hBEEF,
+
+// control signals
+input ready,
+output done,
+input [6:0] length, // length of the array to sort from 0-32
+// debugging
+output [15:0] averageout,		//once we have read in all nums, take average
+
+//output reg [15:0] max = 16'h0000,
+//output reg [15:0] min = 16'hFFFF,
+output reg [2:0] state = 2'b00
+);
+
+reg [31:0] average = 0;
+assign averageout = average[15:0];
+
+// localparam length = 4;
+
+assign done = (state == `DONE);
+
+always @(*) begin
+	byteenable <= 2'b11;
+	chipselect <= 1;
+end
+
+// The queues
+// 1A				2A
+// 1B				2B
+reg [15:0] Q1A[15:0];
+reg [15:0] Q1B[15:0];
+reg [15:0] Q2A[15:0];
+reg [15:0] Q2B[15:0];
+reg [3:0] c1A; // count 1A - remaining numbers in the set for this queue
+reg [3:0] c1B;
+reg [3:0] c2A;
+reg [3:0] c2B;
+
+//READ VARS
+reg [4:0] addresses_sent = 0;
+reg [4:0] numbers_read = 0;
+reg init_write= 0;
+//SORT VARS
+reg [4:0] count = 0;
+reg [3:0] setsize = 1;
+wire [15:0] a;
+wire [15:0] b;
+wire [15:0] c;
+wire [15:0] d;
+
+//WRITE VARS
+reg [4:0] writecount= 0;
+assign a = Q1A[0];
+assign b = Q1B[0];
+assign c = Q2A[0];
+assign d = Q2B[0];
+
+
+// state logic for reading and writing
+always @(posedge clk) begin
+	if(~reset_n) begin
+		state <= `IDLE;
+	end
+	else begin
+		case(state)
+			`IDLE: state <= ready ? `READ : `IDLE;
+			`READ: state <= ((address == length) & (numbers_read == length)) ? `SORT1 : `READ;
+			`SORT1: state <= (length == 2*setsize) ? `PREWRITE : `SORT1;
+			`PREWRITE: state <= `WRITE;
+			`WRITE: state <= (writecount == length) ? `DONE: `WRITE;
+			`DONE: state <= ~ready ? `IDLE : `DONE;
+			default: state <= `IDLE;
+		endcase
+	end
+end
+
+
+/*
+always @(posedge clk) begin
+	if(~reset_n | state ==`IDLE) begin
+		numbers_read <= 0;
+		init_write <= 0;
+		average <= 0;
+	end
+	else if(state == `READ)begin
+		if(numbers_read < length && readdatavalid) begin
+			numbers_read <= numbers_read + 1;
+			init_write <= ~init_write; // toggle queue we read into
+			average <= average + readdata;
+			if(init_write == 0) begin
+				Q1A[0] <= readdata;
+				Q1A[1] <= Q1A[0];
+				Q1A[2] <= Q1A[1];
+				Q1A[3] <= Q1A[2];
+				Q1A[4] <= Q1A[3];
+				Q1A[5] <= Q1A[4];
+				Q1A[6] <= Q1A[5];
+				Q1A[7] <= Q1A[6];
+				Q1A[8] <= Q1A[7];
+				Q1A[9] <= Q1A[8];
+				Q1A[10] <= Q1A[9];
+				Q1A[11] <= Q1A[10];
+				Q1A[12] <= Q1A[11];
+				Q1A[13] <= Q1A[12];
+				Q1A[14] <= Q1A[13];
+				Q1A[15] <= Q1A[14];
+			
+			end
+			else begin
+				Q1B[0] <= readdata;
+				Q1B[1] <= Q1B[0];
+				Q1B[2] <= Q1B[1];
+				Q1B[3] <= Q1B[2];
+				Q1B[4] <= Q1B[3];
+				Q1B[5] <= Q1B[4];
+				Q1B[6] <= Q1B[5];
+				Q1B[7] <= Q1B[6];
+				Q1B[8] <= Q1B[7];
+				Q1B[9] <= Q1B[8];
+				Q1B[10] <= Q1B[9];
+				Q1B[11] <= Q1B[10];
+				Q1B[12] <= Q1B[11];
+				Q1B[13] <= Q1B[12];
+				Q1B[14] <= Q1B[13];
+				Q1B[15] <= Q1B[14];
+				
+			end
+		end
+		
+	end
+
+	else if(state == `PREWRITE) begin
+		average <= average/length;
+	end
+end
+*/
+
+
+reg write_to = `A; 			// current queue writing into A/B
+reg read_from= `LEFT; // current side reading from left/right
+
+always@(posedge clk) begin
+	if(~reset_n | state==`IDLE) begin
+      write_to <= `A;
+		read_from <= `LEFT;
+      c1A <= 1;
+		c1B <= 1;
+		c2A <= 0;
+		c2B <= 0;
+		setsize <= 1;
+		count <= length;
+		numbers_read <= 0;
+		init_write <= 0;
+		average <= 0;
+    end
+	else begin
+		if(state == `SORT1)begin
+			if(count == 0) begin
+				if(setsize*2 != length) begin
+					setsize <= setsize*2;
+					read_from <= ~read_from;
+					write_to <= `A;
+					count <= length;
+				end
+			end
+			else if(read_from == `LEFT) begin
+				if(c1A > 0 && c1B > 0) begin // both queues have data
+					count <= count - 1;
+					if(a <= b) begin			// a <= b
+						c1A <= c1A - 1;
+						
+						if(write_to == `A) begin 
+							Q2A[0] <= a;
+							Q2A[1] <= Q2A[0];
+							Q2A[2] <= Q2A[1];
+							Q2A[3] <= Q2A[2];
+							Q2A[4] <= Q2A[3];
+							Q2A[5] <= Q2A[4];
+							Q2A[6] <= Q2A[5];
+							Q2A[7] <= Q2A[6];
+							Q2A[8] <= Q2A[7];
+							Q2A[9] <= Q2A[8];
+							Q2A[10] <= Q2A[9];
+							Q2A[11] <= Q2A[10];
+							Q2A[12] <= Q2A[11];
+							Q2A[13] <= Q2A[12];
+							Q2A[14] <= Q2A[13];
+							Q2A[15] <= Q2A[14];
+						end // write_to == `A
+						else begin // write_to == `B
+							Q2B[0] <= a;
+							Q2B[1] <= Q2B[0];
+							Q2B[2] <= Q2B[1];
+							Q2B[3] <= Q2B[2];
+							Q2B[4] <= Q2B[3];
+							Q2B[5] <= Q2B[4];
+							Q2B[6] <= Q2B[5];
+							Q2B[7] <= Q2B[6];
+							Q2B[8] <= Q2B[7];
+							Q2B[9] <= Q2B[8];
+							Q2B[10] <= Q2B[9];
+							Q2B[11] <= Q2B[10];
+							Q2B[12] <= Q2B[11];
+							Q2B[13] <= Q2B[12];
+							Q2B[14] <= Q2B[13];
+							Q2B[15] <= Q2B[14];
+						end // write_to == `B
+						Q1A[0] <= Q1A[1];
+						Q1A[1] <= Q1A[2];
+						Q1A[2] <= Q1A[3];
+						Q1A[3] <= Q1A[4];
+						Q1A[4] <= Q1A[5];
+						Q1A[5] <= Q1A[6];
+						Q1A[6] <= Q1A[7];
+						Q1A[7] <= Q1A[8];
+						Q1A[8] <= Q1A[9];
+						Q1A[9] <= Q1A[10];
+						Q1A[10] <= Q1A[11];
+						Q1A[11] <= Q1A[12];
+						Q1A[12] <= Q1A[13];
+						Q1A[13] <= Q1A[14];
+						Q1A[14] <= Q1A[15];
+						Q1A[15] <= 0;
+					end // a <= b
+//*****************************************************************************
+					else begin // a > b
+						c1B <= c1B - 1;
+						if(write_to == `A) begin 
+							Q2A[0] <= b;
+							Q2A[1] <= Q2A[0];
+							Q2A[2] <= Q2A[1];
+							Q2A[3] <= Q2A[2];
+							Q2A[4] <= Q2A[3];
+							Q2A[5] <= Q2A[4];
+							Q2A[6] <= Q2A[5];
+							Q2A[7] <= Q2A[6];
+							Q2A[8] <= Q2A[7];
+							Q2A[9] <= Q2A[8];
+							Q2A[10] <= Q2A[9];
+							Q2A[11] <= Q2A[10];
+							Q2A[12] <= Q2A[11];
+							Q2A[13] <= Q2A[12];
+							Q2A[14] <= Q2A[13];
+							Q2A[15] <= Q2A[14];
+						end // write_to == `A
+						else begin // write_to == `B
+							Q2B[0] <= b;
+							Q2B[1] <= Q2B[0];
+							Q2B[2] <= Q2B[1];
+							Q2B[3] <= Q2B[2];
+							Q2B[4] <= Q2B[3];
+							Q2B[5] <= Q2B[4];
+							Q2B[6] <= Q2B[5];
+							Q2B[7] <= Q2B[6];
+							Q2B[8] <= Q2B[7];
+							Q2B[9] <= Q2B[8];
+							Q2B[10] <= Q2B[9];
+							Q2B[11] <= Q2B[10];
+							Q2B[12] <= Q2B[11];
+							Q2B[13] <= Q2B[12];
+							Q2B[14] <= Q2B[13];
+							Q2B[15] <= Q2B[14];
+						end // write_to == `B
+						Q1B[0] <= Q1B[1];
+						Q1B[1] <= Q1B[2];
+						Q1B[2] <= Q1B[3];
+						Q1B[3] <= Q1B[4];
+						Q1B[4] <= Q1B[5];
+						Q1B[5] <= Q1B[6];
+						Q1B[6] <= Q1B[7];
+						Q1B[7] <= Q1B[8];
+						Q1B[8] <= Q1B[9];
+						Q1B[9] <= Q1B[10];
+						Q1B[10] <= Q1B[11];
+						Q1B[11] <= Q1B[12];
+						Q1B[12] <= Q1B[13];
+						Q1B[13] <= Q1B[14];
+						Q1B[14] <= Q1B[15];
+						Q1B[15] <= 0;
+					end // a > b
+				end // compare both
+//*********************************************************************				
+				else if(c1A > 0) begin
+					count <= count - 1;
+					c1A <= c1A - 1;
+					if(write_to == `A) begin
+						Q2A[0] <= a;
+						Q2A[1] <= Q2A[0];
+						Q2A[2] <= Q2A[1];
+						Q2A[3] <= Q2A[2];
+						Q2A[4] <= Q2A[3];
+						Q2A[5] <= Q2A[4];
+						Q2A[6] <= Q2A[5];
+						Q2A[7] <= Q2A[6];
+						Q2A[8] <= Q2A[7];
+						Q2A[9] <= Q2A[8];
+						Q2A[10] <= Q2A[9];
+						Q2A[11] <= Q2A[10];
+						Q2A[12] <= Q2A[11];
+						Q2A[13] <= Q2A[12];
+						Q2A[14] <= Q2A[13];
+						Q2A[15] <= Q2A[14];
+					end //write_to == `A
+					else begin // write_to == `B
+						Q2B[0] <= a;
+						Q2B[1] <= Q2B[0];
+						Q2B[2] <= Q2B[1];
+						Q2B[3] <= Q2B[2];
+						Q2B[4] <= Q2B[3];
+						Q2B[5] <= Q2B[4];
+						Q2B[6] <= Q2B[5];
+						Q2B[7] <= Q2B[6];
+						Q2B[8] <= Q2B[7];
+						Q2B[9] <= Q2B[8];
+						Q2B[10] <= Q2B[9];
+						Q2B[11] <= Q2B[10];
+						Q2B[12] <= Q2B[11];
+						Q2B[13] <= Q2B[12];
+						Q2B[14] <= Q2B[13];
+						Q2B[15] <= Q2B[14];
+					end // write_to == `B
+					Q1A[0] <= Q1A[1];
+					Q1A[1] <= Q1A[2];
+					Q1A[2] <= Q1A[3];
+					Q1A[3] <= Q1A[4];
+					Q1A[4] <= Q1A[5];
+					Q1A[5] <= Q1A[6];
+					Q1A[6] <= Q1A[7];
+					Q1A[7] <= Q1A[8];
+					Q1A[8] <= Q1A[9];
+					Q1A[9] <= Q1A[10];
+					Q1A[10] <= Q1A[11];
+					Q1A[11] <= Q1A[12];
+					Q1A[12] <= Q1A[13];
+					Q1A[13] <= Q1A[14];
+					Q1A[14] <= Q1A[15];
+					Q1A[15] <= 0;
+						
+				end //C1A only
+				
+				
+				else if(c1B > 0) begin
+					count <= count - 1;
+					c1B <= c1B - 1;
+					if(write_to == `A) begin 
+						Q2A[0] <= b;
+						Q2A[1] <= Q2A[0];
+						Q2A[2] <= Q2A[1];
+						Q2A[3] <= Q2A[2];
+						Q2A[4] <= Q2A[3];
+						Q2A[5] <= Q2A[4];
+						Q2A[6] <= Q2A[5];
+						Q2A[7] <= Q2A[6];
+						Q2A[8] <= Q2A[7];
+						Q2A[9] <= Q2A[8];
+						Q2A[10] <= Q2A[9];
+						Q2A[11] <= Q2A[10];
+						Q2A[12] <= Q2A[11];
+						Q2A[13] <= Q2A[12];
+						Q2A[14] <= Q2A[13];
+						Q2A[15] <= Q2A[14];
+						end // write_to == `A
+					else begin // write_to == `B
+						Q2B[0] <= b;
+						Q2B[1] <= Q2B[0];
+						Q2B[2] <= Q2B[1];
+						Q2B[3] <= Q2B[2];
+						Q2B[4] <= Q2B[3];
+						Q2B[5] <= Q2B[4];
+						Q2B[6] <= Q2B[5];
+						Q2B[7] <= Q2B[6];
+						Q2B[8] <= Q2B[7];
+						Q2B[9] <= Q2B[8];
+						Q2B[10] <= Q2B[9];
+						Q2B[11] <= Q2B[10];
+						Q2B[12] <= Q2B[11];
+						Q2B[13] <= Q2B[12];
+						Q2B[14] <= Q2B[13];
+						Q2B[15] <= Q2B[14];
+					end // write_to == `B
+					Q1B[0] <= Q1B[1];
+					Q1B[1] <= Q1B[2];
+					Q1B[2] <= Q1B[3];
+					Q1B[3] <= Q1B[4];
+					Q1B[4] <= Q1B[5];
+					Q1B[5] <= Q1B[6];
+					Q1B[6] <= Q1B[7];
+					Q1B[7] <= Q1B[8];
+					Q1B[8] <= Q1B[9];
+					Q1B[9] <= Q1B[10];
+					Q1B[10] <= Q1B[11];
+					Q1B[11] <= Q1B[12];
+					Q1B[12] <= Q1B[13];
+					Q1B[13] <= Q1B[14];
+					Q1B[14] <= Q1B[15];
+					Q1B[15] <= 0;
+				
+				end// only c1B
+				
+				
+				else begin
+					c1A <= setsize;
+					c1B <= setsize;
+					write_to <= ~write_to;
+				
+				end
+			end //read from left
+			else begin // read_from == `RIGHT
+				if(c2A > 0 && c2B > 0) begin // both queues have data
+					count <= count - 1;
+					if(c <= d) begin			// c <= d
+						c2B <= c2B - 1;
+						
+						if(write_to == `A) begin 
+							Q1A[0] <= d;
+							Q1A[1] <= Q1A[0];
+							Q1A[2] <= Q1A[1];
+							Q1A[3] <= Q1A[2];
+							Q1A[4] <= Q1A[3];
+							Q1A[5] <= Q1A[4];
+							Q1A[6] <= Q1A[5];
+							Q1A[7] <= Q1A[6];
+							Q1A[8] <= Q1A[7];
+							Q1A[9] <= Q1A[8];
+							Q1A[10] <= Q1A[9];
+							Q1A[11] <= Q1A[10];
+							Q1A[12] <= Q1A[11];
+							Q1A[13] <= Q1A[12];
+							Q1A[14] <= Q1A[13];
+							Q1A[15] <= Q1A[14];
+						end // write_to == `A
+						else begin // write_to == `B
+							Q1B[0] <= d;
+							Q1B[1] <= Q1B[0];
+							Q1B[2] <= Q1B[1];
+							Q1B[3] <= Q1B[2];
+							Q1B[4] <= Q1B[3];
+							Q1B[5] <= Q1B[4];
+							Q1B[6] <= Q1B[5];
+							Q1B[7] <= Q1B[6];
+							Q1B[8] <= Q1B[7];
+							Q1B[9] <= Q1B[8];
+							Q1B[10] <= Q1B[9];
+							Q1B[11] <= Q1B[10];
+							Q1B[12] <= Q1B[11];
+							Q1B[13] <= Q1B[12];
+							Q1B[14] <= Q1B[13];
+							Q1B[15] <= Q1B[14];
+						end // write_to == `B
+						Q2B[0] <= Q2B[1];
+						Q2B[1] <= Q2B[2];
+						Q2B[2] <= Q2B[3];
+						Q2B[3] <= Q2B[4];
+						Q2B[4] <= Q2B[5];
+						Q2B[5] <= Q2B[6];
+						Q2B[6] <= Q2B[7];
+						Q2B[7] <= Q2B[8];
+						Q2B[8] <= Q2B[9];
+						Q2B[9] <= Q2B[10];
+						Q2B[10] <= Q2B[11];
+						Q2B[11] <= Q2B[12];
+						Q2B[12] <= Q2B[13];
+						Q2B[13] <= Q2B[14];
+						Q2B[14] <= Q2B[15];
+						Q2B[15] <= 0;
+					end // c <= d
+//*****************************************************************************
+					else begin // c > d
+						c2A <= c2A - 1;
+						if(write_to == `A) begin 
+							Q1A[0] <= c;
+							Q1A[1] <= Q1A[0];
+							Q1A[2] <= Q1A[1];
+							Q1A[3] <= Q1A[2];
+							Q1A[4] <= Q1A[3];
+							Q1A[5] <= Q1A[4];
+							Q1A[6] <= Q1A[5];
+							Q1A[7] <= Q1A[6];
+							Q1A[8] <= Q1A[7];
+							Q1A[9] <= Q1A[8];
+							Q1A[10] <= Q1A[9];
+							Q1A[11] <= Q1A[10];
+							Q1A[12] <= Q1A[11];
+							Q1A[13] <= Q1A[12];
+							Q1A[14] <= Q1A[13];
+							Q1A[15] <= Q1A[14];
+						end // write_to == `A
+						else begin // write_to == `B
+							Q1B[0] <= c;
+							Q1B[1] <= Q1B[0];
+							Q1B[2] <= Q1B[1];
+							Q1B[3] <= Q1B[2];
+							Q1B[4] <= Q1B[3];
+							Q1B[5] <= Q1B[4];
+							Q1B[6] <= Q1B[5];
+							Q1B[7] <= Q1B[6];
+							Q1B[8] <= Q1B[7];
+							Q1B[9] <= Q1B[8];
+							Q1B[10] <= Q1B[9];
+							Q1B[11] <= Q1B[10];
+							Q1B[12] <= Q1B[11];
+							Q1B[13] <= Q1B[12];
+							Q1B[14] <= Q1B[13];
+							Q1B[15] <= Q1B[14];
+						end // write_to == `B
+						Q2A[0] <= Q2A[1];
+						Q2A[1] <= Q2A[2];
+						Q2A[2] <= Q2A[3];
+						Q2A[3] <= Q2A[4];
+						Q2A[4] <= Q2A[5];
+						Q2A[5] <= Q2A[6];
+						Q2A[6] <= Q2A[7];
+						Q2A[7] <= Q2A[8];
+						Q2A[8] <= Q2A[9];
+						Q2A[9] <= Q2A[10];
+						Q2A[10] <= Q2A[11];
+						Q2A[11] <= Q2A[12];
+						Q2A[12] <= Q2A[13];
+						Q2A[13] <= Q2A[14];
+						Q2A[14] <= Q2A[15];
+						Q2A[15] <= 0;
+					end // c > d
+				end // compare both
+//*********************************************************************				
+				else if(c2A > 0) begin
+					count <= count - 1;
+					c2A <= c2A - 1;
+					if(write_to == `A) begin
+						Q1A[0] <= c;
+						Q1A[1] <= Q1A[0];
+						Q1A[2] <= Q1A[1];
+						Q1A[3] <= Q1A[2];
+						Q1A[4] <= Q1A[3];
+						Q1A[5] <= Q1A[4];
+						Q1A[6] <= Q1A[5];
+						Q1A[7] <= Q1A[6];
+						Q1A[8] <= Q1A[7];
+						Q1A[9] <= Q1A[8];
+						Q1A[10] <= Q1A[9];
+						Q1A[11] <= Q1A[10];
+						Q1A[12] <= Q1A[11];
+						Q1A[13] <= Q1A[12];
+						Q1A[14] <= Q1A[13];
+						Q1A[15] <= Q1A[14];
+					end //write_to == `A
+					else begin // write_to == `B
+						Q1B[0] <= c;
+						Q1B[1] <= Q1B[0];
+						Q1B[2] <= Q1B[1];
+						Q1B[3] <= Q1B[2];
+						Q1B[4] <= Q1B[3];
+						Q1B[5] <= Q1B[4];
+						Q1B[6] <= Q1B[5];
+						Q1B[7] <= Q1B[6];
+						Q1B[8] <= Q1B[7];
+						Q1B[9] <= Q1B[8];
+						Q1B[10] <= Q1B[9];
+						Q1B[11] <= Q1B[10];
+						Q1B[12] <= Q1B[11];
+						Q1B[13] <= Q1B[12];
+						Q1B[14] <= Q1B[13];
+						Q1B[15] <= Q1B[14];
+					end // write_to == `B
+					Q2A[0] <= Q2A[1];
+					Q2A[1] <= Q2A[2];
+					Q2A[2] <= Q2A[3];
+					Q2A[3] <= Q2A[4];
+					Q2A[4] <= Q2A[5];
+					Q2A[5] <= Q2A[6];
+					Q2A[6] <= Q2A[7];
+					Q2A[7] <= Q2A[8];
+					Q2A[8] <= Q2A[9];
+					Q2A[9] <= Q2A[10];
+					Q2A[10] <= Q2A[11];
+					Q2A[11] <= Q2A[12];
+					Q2A[12] <= Q2A[13];
+					Q2A[13] <= Q2A[14];
+					Q2A[14] <= Q2A[15];
+					Q2A[15] <= 0;
+						
+				end //C2A only
+				
+				
+				else if(c2B > 0) begin
+					count <= count - 1;
+					c2B <= c2B - 1;
+					if(write_to == `A) begin 
+						Q1A[0] <= d;
+						Q1A[1] <= Q1A[0];
+						Q1A[2] <= Q1A[1];
+						Q1A[3] <= Q1A[2];
+						Q1A[4] <= Q1A[3];
+						Q1A[5] <= Q1A[4];
+						Q1A[6] <= Q1A[5];
+						Q1A[7] <= Q1A[6];
+						Q1A[8] <= Q1A[7];
+						Q1A[9] <= Q1A[8];
+						Q1A[10] <= Q1A[9];
+						Q1A[11] <= Q1A[10];
+						Q1A[12] <= Q1A[11];
+						Q1A[13] <= Q1A[12];
+						Q1A[14] <= Q1A[13];
+						Q1A[15] <= Q1A[14];
+						end // write_to == `A
+					else begin // write_to == `B
+						Q1B[0] <= d;
+						Q1B[1] <= Q1B[0];
+						Q1B[2] <= Q1B[1];
+						Q1B[3] <= Q1B[2];
+						Q1B[4] <= Q1B[3];
+						Q1B[5] <= Q1B[4];
+						Q1B[6] <= Q1B[5];
+						Q1B[7] <= Q1B[6];
+						Q1B[8] <= Q1B[7];
+						Q1B[9] <= Q1B[8];
+						Q1B[10] <= Q1B[9];
+						Q1B[11] <= Q1B[10];
+						Q1B[12] <= Q1B[11];
+						Q1B[13] <= Q1B[12];
+						Q1B[14] <= Q1B[13];
+						Q1B[15] <= Q1B[14];
+					end // write_to == `B
+					Q2B[0] <= Q2B[1];
+					Q2B[1] <= Q2B[2];
+					Q2B[2] <= Q2B[3];
+					Q2B[3] <= Q2B[4];
+					Q2B[4] <= Q2B[5];
+					Q2B[5] <= Q2B[6];
+					Q2B[6] <= Q2B[7];
+					Q2B[7] <= Q2B[8];
+					Q2B[8] <= Q2B[9];
+					Q2B[9] <= Q2B[10];
+					Q2B[10] <= Q2B[11];
+					Q2B[11] <= Q2B[12];
+					Q2B[12] <= Q2B[13];
+					Q2B[13] <= Q2B[14];
+					Q2B[14] <= Q2B[15];
+					Q2B[15] <= 0;
+				
+				end// only c2B
+				
+				else begin // both counts are zero
+					c2A <= setsize;
+					c2B <= setsize;
+					write_to <= ~write_to;
+				end
+			end //read from right
+		end
+		else if (state == `PREWRITE)begin
+			c1A <= length /2;
+			c1B <= length /2;
+			c2A <= length /2;
+			c2B <= length /2;
+			average <= average/length;
+		end
+		else if(state==`WRITE) begin
+			if(length == 4  | length == 16) begin
+				if(~waitrequest) begin
+					if(c2A > 0 && c2B > 0) begin
+						if(c <= d)begin
+							c2B <= c2B -1;
+							Q2B[0] <= Q2B[1];
+							Q2B[1] <= Q2B[2];
+							Q2B[2] <= Q2B[3];
+							Q2B[3] <= Q2B[4];
+							Q2B[4] <= Q2B[5];
+							Q2B[5] <= Q2B[6];
+							Q2B[6] <= Q2B[7];
+							Q2B[7] <= Q2B[8];
+							Q2B[8] <= Q2B[9];
+							Q2B[9] <= Q2B[10];
+							Q2B[10] <= Q2B[11];
+							Q2B[11] <= Q2B[12];
+							Q2B[12] <= Q2B[13];
+							Q2B[13] <= Q2B[14];
+							Q2B[14] <= Q2B[15];
+							Q2B[15] <= 0;
+						end
+						else begin
+							c2A <= c2A -1;
+							Q2A[0] <= Q2A[1];
+							Q2A[1] <= Q2A[2];
+							Q2A[2] <= Q2A[3];
+							Q2A[3] <= Q2A[4];
+							Q2A[4] <= Q2A[5];
+							Q2A[5] <= Q2A[6];
+							Q2A[6] <= Q2A[7];
+							Q2A[7] <= Q2A[8];
+							Q2A[8] <= Q2A[9];
+							Q2A[9] <= Q2A[10];
+							Q2A[10] <= Q2A[11];
+							Q2A[11] <= Q2A[12];
+							Q2A[12] <= Q2A[13];
+							Q2A[13] <= Q2A[14];
+							Q2A[14] <= Q2A[15];
+							Q2A[15] <= 0;
+						end
+					end
+					else if (c2A > 0)begin
+						c2A <= c2A -1;
+						Q2A[0] <= Q2A[1];
+						Q2A[1] <= Q2A[2];
+						Q2A[2] <= Q2A[3];
+						Q2A[3] <= Q2A[4];
+						Q2A[4] <= Q2A[5];
+						Q2A[5] <= Q2A[6];
+						Q2A[6] <= Q2A[7];
+						Q2A[7] <= Q2A[8];
+						Q2A[8] <= Q2A[9];
+						Q2A[9] <= Q2A[10];
+						Q2A[10] <= Q2A[11];
+						Q2A[11] <= Q2A[12];
+						Q2A[12] <= Q2A[13];
+						Q2A[13] <= Q2A[14];
+						Q2A[14] <= Q2A[15];
+						Q2A[15] <= 0;
+					end //c2a > 0
+					else if(c2B > 0)begin
+						c2B <= c2B -1;
+						Q2B[0] <= Q2B[1];
+						Q2B[1] <= Q2B[2];
+						Q2B[2] <= Q2B[3];
+						Q2B[3] <= Q2B[4];
+						Q2B[4] <= Q2B[5];
+						Q2B[5] <= Q2B[6];
+						Q2B[6] <= Q2B[7];
+						Q2B[7] <= Q2B[8];
+						Q2B[8] <= Q2B[9];
+						Q2B[9] <= Q2B[10];
+						Q2B[10] <= Q2B[11];
+						Q2B[11] <= Q2B[12];
+						Q2B[12] <= Q2B[13];
+						Q2B[13] <= Q2B[14];
+						Q2B[14] <= Q2B[15];
+						Q2B[15] <= 0;
+					end
+					else begin
+						Q2B[0] <= 16'hDEAD;
+						Q2A[0] <= 16'hDEAF;
+					
+					end
+					// shift the larger one
+				end	//waitrequest
+			end	//length check == 4 | 16
+			else begin
+				if(~waitrequest) begin
+					if(c1A > 0 && c1B > 0) begin
+						if(a <= b)begin
+							c1A <= c1A -1;
+							Q1A[0] <= Q1A[1];
+							Q1A[1] <= Q1A[2];
+							Q1A[2] <= Q1A[3];
+							Q1A[3] <= Q1A[4];
+							Q1A[4] <= Q1A[5];
+							Q1A[5] <= Q1A[6];
+							Q1A[6] <= Q1A[7];
+							Q1A[7] <= Q1A[8];
+							Q1A[8] <= Q1A[9];
+							Q1A[9] <= Q1A[10];
+							Q1A[10] <= Q1A[11];
+							Q1A[11] <= Q1A[12];
+							Q1A[12] <= Q1A[13];
+							Q1A[13] <= Q1A[14];
+							Q1A[14] <= Q1A[15];
+							Q1A[15] <= 0;
+						end
+						else begin
+							c1B <= c1B -1;
+							Q1B[0] <= Q1B[1];
+							Q1B[1] <= Q1B[2];
+							Q1B[2] <= Q1B[3];
+							Q1B[3] <= Q1B[4];
+							Q1B[4] <= Q1B[5];
+							Q1B[5] <= Q1B[6];
+							Q1B[6] <= Q1B[7];
+							Q1B[7] <= Q1B[8];
+							Q1B[8] <= Q1B[9];
+							Q1B[9] <= Q1B[10];
+							Q1B[10] <= Q1B[11];
+							Q1B[11] <= Q1B[12];
+							Q1B[12] <= Q1B[13];
+							Q1B[13] <= Q1B[14];
+							Q1B[14] <= Q1B[15];
+							Q1B[15] <= 0;
+						end
+					end
+					else if (c1A > 0)begin
+						c1A <= c1A -1;
+						Q1A[0] <= Q1A[1];
+						Q1A[1] <= Q1A[2];
+						Q1A[2] <= Q1A[3];
+						Q1A[3] <= Q1A[4];
+						Q1A[4] <= Q1A[5];
+						Q1A[5] <= Q1A[6];
+						Q1A[6] <= Q1A[7];
+						Q1A[7] <= Q1A[8];
+						Q1A[8] <= Q1A[9];
+						Q1A[9] <= Q1A[10];
+						Q1A[10] <= Q1A[11];
+						Q1A[11] <= Q1A[12];
+						Q1A[12] <= Q1A[13];
+						Q1A[13] <= Q1A[14];
+						Q1A[14] <= Q1A[15];
+						Q1A[15] <= 0;
+					end //c1a > 0
+					else if(c1B > 0)begin
+						c1B <= c1B -1;
+						Q1B[0] <= Q1B[1];
+						Q1B[1] <= Q1B[2];
+						Q1B[2] <= Q1B[3];
+						Q1B[3] <= Q1B[4];
+						Q1B[4] <= Q1B[5];
+						Q1B[5] <= Q1B[6];
+						Q1B[6] <= Q1B[7];
+						Q1B[7] <= Q1B[8];
+						Q1B[8] <= Q1B[9];
+						Q1B[9] <= Q1B[10];
+						Q1B[10] <= Q1B[11];
+						Q1B[11] <= Q1B[12];
+						Q1B[12] <= Q1B[13];
+						Q1B[13] <= Q1B[14];
+						Q1B[14] <= Q1B[15];
+						Q1B[15] <= 0;
+					end
+					else begin
+						Q1B[0] <= 16'hDEAD;
+						Q1A[0] <= 16'hDEAF;
+					
+					end
+					// shift the smaller one
+				end //waitrequest
+			end	//else -> length =! 4 | 16
+		end		//state==WRITE
+		else if(state == `READ)begin
+		if(numbers_read < length && readdatavalid) begin
+			numbers_read <= numbers_read + 1;
+			init_write <= ~init_write; // toggle queue we read into
+			average <= average + readdata;
+			if(init_write == 0) begin
+				Q1A[0] <= readdata;
+				Q1A[1] <= Q1A[0];
+				Q1A[2] <= Q1A[1];
+				Q1A[3] <= Q1A[2];
+				Q1A[4] <= Q1A[3];
+				Q1A[5] <= Q1A[4];
+				Q1A[6] <= Q1A[5];
+				Q1A[7] <= Q1A[6];
+				Q1A[8] <= Q1A[7];
+				Q1A[9] <= Q1A[8];
+				Q1A[10] <= Q1A[9];
+				Q1A[11] <= Q1A[10];
+				Q1A[12] <= Q1A[11];
+				Q1A[13] <= Q1A[12];
+				Q1A[14] <= Q1A[13];
+				Q1A[15] <= Q1A[14];
+			
+			end
+			else begin
+				Q1B[0] <= readdata;
+				Q1B[1] <= Q1B[0];
+				Q1B[2] <= Q1B[1];
+				Q1B[3] <= Q1B[2];
+				Q1B[4] <= Q1B[3];
+				Q1B[5] <= Q1B[4];
+				Q1B[6] <= Q1B[5];
+				Q1B[7] <= Q1B[6];
+				Q1B[8] <= Q1B[7];
+				Q1B[9] <= Q1B[8];
+				Q1B[10] <= Q1B[9];
+				Q1B[11] <= Q1B[10];
+				Q1B[12] <= Q1B[11];
+				Q1B[13] <= Q1B[12];
+				Q1B[14] <= Q1B[13];
+				Q1B[15] <= Q1B[14];
+				
+			end
+		end
+		
+	end
+
+end
+		
+		
+		
+		
+end
+		
+always @(posedge clk)begin
+		if(~reset_n | state == `IDLE) begin
+		write_n <= 1;
+		read_n <= 1;
+		address <= 0;
+		writedata <= 16'hF00D;
+		end
+		else begin
+		case (state)
+		`IDLE:
+			begin
+				write_n <= 1;
+				read_n <= 1;
+				address <= 0;
+				writedata <= 16'hCACA;
+				addresses_sent <= 0;
+			end	
+			
+		`READ:
+			begin
+				read_n <= (address < length) ? 0: 1;
+				address <= (~waitrequest & (address < length)) ? address+1 : address; // inc on ~waitrequest
+				addresses_sent <= waitrequest ? addresses_sent : addresses_sent + 1;
+				write_n <= 1;
+				writedata <= 16'hDADA;
+			end
+			
+		`SORT1:
+			begin
+				read_n <= 1;
+				write_n <= 1;
+				address <= length;		//keep the same, wont change
+				writedata <= 16'hABCD;
+			
+			end
+		`PREWRITE:
+			begin
+				read_n <= 1;
+				write_n <= 1;
+				address <= (length== 4 || length == 16) ? 2*length-1: length;
+				writecount <= 0;
+				writedata <= 16'hFAFA;
+			end
+		`WRITE:
+			begin
+				read_n <= 1;
+				write_n <= (~waitrequest && writecount == length - 1) ? 1 : 0;
+				writecount <= ~waitrequest ? writecount + 1: writecount;
+				if(length== 4 || length == 16)begin
+					address<= (~waitrequest && address >= length)? address-1 : address;
+					if(c2A > 0 && c2B > 0)begin
+						writedata<= (c >= d) ? c : d;
+					end
+					else begin
+						writedata <= (c2A > 0) ? c : d;
+					end
+					
+					
+				end
+				else begin
+					address<= (~waitrequest && address < 2*length)? address+1 : address;
+					if(c1A > 0 && c1B > 0)begin
+						writedata<= (a <= b) ? a : b;
+					end
+					else begin
+						writedata <= (c1A > 0) ? a : b;
+					end
+				end
+			end
+		`DONE:
+			begin	
+				read_n <= 1;
+				write_n <= 1;
+				address <= 0;
+				addresses_sent <= 0;
+				writedata = 16'hBEEF;
+			end
+				
+		endcase
+			
+		end	
+end		
+				
+				
+endmodule

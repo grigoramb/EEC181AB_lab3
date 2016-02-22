@@ -38,11 +38,27 @@
          type = "String";
       }
    }
+   element average_to_hps
+   {
+      datum _sortIndex
+      {
+         value = "9";
+         type = "int";
+      }
+   }
+   element average_to_hps.s1
+   {
+      datum baseAddress
+      {
+         value = "48";
+         type = "String";
+      }
+   }
    element done_bit_to_hps
    {
       datum _sortIndex
       {
-         value = "7";
+         value = "6";
          type = "int";
       }
    }
@@ -82,7 +98,7 @@
    {
       datum _sortIndex
       {
-         value = "8";
+         value = "7";
          type = "int";
       }
    }
@@ -91,6 +107,54 @@
       datum baseAddress
       {
          value = "32";
+         type = "String";
+      }
+   }
+   element mysystem
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Cyclone V";
+         type = "String";
+      }
+   }
+   element mysystem
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Cyclone V";
+         type = "String";
+      }
+   }
+   element mysystem
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Cyclone V";
+         type = "String";
+      }
+   }
+   element mysystem
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Cyclone V";
+         type = "String";
+      }
+   }
+   element mysystem
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Cyclone V";
+         type = "String";
+      }
+   }
+   element mysystem
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Cyclone V";
          type = "String";
       }
    }
@@ -166,11 +230,27 @@
          type = "String";
       }
    }
+   element readaddress_from_hps
+   {
+      datum _sortIndex
+      {
+         value = "10";
+         type = "int";
+      }
+   }
+   element readaddress_from_hps.s1
+   {
+      datum baseAddress
+      {
+         value = "128";
+         type = "String";
+      }
+   }
    element ready_bit_from_hps
    {
       datum _sortIndex
       {
-         value = "6";
+         value = "5";
          type = "int";
       }
    }
@@ -182,11 +262,11 @@
          type = "String";
       }
    }
-   element sdram_master_0
+   element sort_component
    {
       datum _sortIndex
       {
-         value = "5";
+         value = "8";
          type = "int";
       }
    }
@@ -196,6 +276,22 @@
       {
          value = "0";
          type = "int";
+      }
+   }
+   element writeaddress_from_hps
+   {
+      datum _sortIndex
+      {
+         value = "11";
+         type = "int";
+      }
+   }
+   element writeaddress_from_hps.s1
+   {
+      datum baseAddress
+      {
+         value = "144";
+         type = "String";
       }
    }
 }
@@ -220,6 +316,16 @@
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface
+   name="average_to_hps"
+   internal="average_to_hps.external_connection"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="control"
+   internal="sort_component.control"
+   type="conduit"
+   dir="end" />
+ <interface
    name="done_bit"
    internal="done_bit_to_hps.external_connection"
    type="conduit"
@@ -231,6 +337,11 @@
    dir="end" />
  <interface name="memory" internal="hps_0.memory" type="conduit" dir="end" />
  <interface
+   name="readaddress_from_hps"
+   internal="readaddress_from_hps.external_connection"
+   type="conduit"
+   dir="end" />
+ <interface
    name="ready_bit"
    internal="ready_bit_from_hps.external_connection"
    type="conduit"
@@ -240,17 +351,6 @@
    internal="sys_clk.sdram_clk"
    type="clock"
    dir="start" />
- <interface name="sdram_master_0_conduit" internal="sdram_master_0.CONDUIT" />
- <interface
-   name="sdram_master_0_control"
-   internal="sdram_master_0.control"
-   type="conduit"
-   dir="end" />
- <interface
-   name="sdram_master_0_debug"
-   internal="sdram_master_0.debug"
-   type="conduit"
-   dir="end" />
  <interface name="sdram_wire" internal="SDRAM.wire" type="conduit" dir="end" />
  <interface
    name="system_ref_clk"
@@ -261,6 +361,11 @@
    name="system_ref_reset"
    internal="sys_clk.ref_reset"
    type="reset"
+   dir="end" />
+ <interface
+   name="writeaddress_from_hps"
+   internal="writeaddress_from_hps.external_connection"
+   type="conduit"
    dir="end" />
  <module
    name="SDRAM"
@@ -290,6 +395,24 @@
   <parameter name="refreshPeriod" value="15.625" />
   <parameter name="registerDataIn" value="true" />
   <parameter name="rowWidth" value="13" />
+ </module>
+ <module
+   name="average_to_hps"
+   kind="altera_avalon_pio"
+   version="15.0"
+   enabled="1">
+  <parameter name="bitClearingEdgeCapReg" value="true" />
+  <parameter name="bitModifyingOutReg" value="false" />
+  <parameter name="captureEdge" value="true" />
+  <parameter name="clockRate" value="50000000" />
+  <parameter name="direction" value="Input" />
+  <parameter name="edgeType" value="FALLING" />
+  <parameter name="generateIRQ" value="true" />
+  <parameter name="irqType" value="EDGE" />
+  <parameter name="resetValue" value="0" />
+  <parameter name="simDoTestBenchWiring" value="true" />
+  <parameter name="simDrivenValue" value="0" />
+  <parameter name="width" value="16" />
  </module>
  <module
    name="done_bit_to_hps"
@@ -870,7 +993,7 @@
   <parameter name="resetValue" value="0" />
   <parameter name="simDoTestBenchWiring" value="true" />
   <parameter name="simDrivenValue" value="0" />
-  <parameter name="width" value="6" />
+  <parameter name="width" value="7" />
  </module>
  <module
    name="onchip_memory2_0"
@@ -902,6 +1025,24 @@
   <parameter name="writable" value="true" />
  </module>
  <module
+   name="readaddress_from_hps"
+   kind="altera_avalon_pio"
+   version="15.0"
+   enabled="1">
+  <parameter name="bitClearingEdgeCapReg" value="true" />
+  <parameter name="bitModifyingOutReg" value="false" />
+  <parameter name="captureEdge" value="true" />
+  <parameter name="clockRate" value="50000000" />
+  <parameter name="direction" value="Output" />
+  <parameter name="edgeType" value="FALLING" />
+  <parameter name="generateIRQ" value="true" />
+  <parameter name="irqType" value="EDGE" />
+  <parameter name="resetValue" value="0" />
+  <parameter name="simDoTestBenchWiring" value="true" />
+  <parameter name="simDrivenValue" value="0" />
+  <parameter name="width" value="32" />
+ </module>
+ <module
    name="ready_bit_from_hps"
    kind="altera_avalon_pio"
    version="15.0"
@@ -919,7 +1060,7 @@
   <parameter name="simDrivenValue" value="0" />
   <parameter name="width" value="1" />
  </module>
- <module name="sdram_master_0" kind="sdram_master" version="1.0" enabled="1" />
+ <module name="sort_component" kind="sort" version="1.0" enabled="1" />
  <module
    name="sys_clk"
    kind="altera_up_avalon_sys_sdram_pll"
@@ -935,10 +1076,28 @@
   <parameter name="gui_refclk" value="50.0" />
   <parameter name="other_boards" value="None" />
  </module>
+ <module
+   name="writeaddress_from_hps"
+   kind="altera_avalon_pio"
+   version="15.0"
+   enabled="1">
+  <parameter name="bitClearingEdgeCapReg" value="true" />
+  <parameter name="bitModifyingOutReg" value="false" />
+  <parameter name="captureEdge" value="true" />
+  <parameter name="clockRate" value="50000000" />
+  <parameter name="direction" value="Output" />
+  <parameter name="edgeType" value="FALLING" />
+  <parameter name="generateIRQ" value="true" />
+  <parameter name="irqType" value="EDGE" />
+  <parameter name="resetValue" value="0" />
+  <parameter name="simDoTestBenchWiring" value="true" />
+  <parameter name="simDrivenValue" value="0" />
+  <parameter name="width" value="32" />
+ </module>
  <connection
    kind="avalon"
    version="15.0"
-   start="sdram_master_0.avalon_master"
+   start="sort_component.avalon_master"
    end="SDRAM.s1">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0000" />
@@ -999,6 +1158,33 @@
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
+   kind="avalon"
+   version="15.0"
+   start="hps_0.h2f_lw_axi_master"
+   end="average_to_hps.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0030" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="15.0"
+   start="hps_0.h2f_lw_axi_master"
+   end="readaddress_from_hps.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0080" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="15.0"
+   start="hps_0.h2f_lw_axi_master"
+   end="writeaddress_from_hps.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0090" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
    kind="clock"
    version="15.0"
    start="sys_clk.sys_clk"
@@ -1023,12 +1209,27 @@
    kind="clock"
    version="15.0"
    start="sys_clk.sys_clk"
+   end="average_to_hps.clk" />
+ <connection
+   kind="clock"
+   version="15.0"
+   start="sys_clk.sys_clk"
+   end="readaddress_from_hps.clk" />
+ <connection
+   kind="clock"
+   version="15.0"
+   start="sys_clk.sys_clk"
+   end="writeaddress_from_hps.clk" />
+ <connection
+   kind="clock"
+   version="15.0"
+   start="sys_clk.sys_clk"
    end="onchip_memory2_0.clk1" />
  <connection
    kind="clock"
    version="15.0"
    start="sys_clk.sys_clk"
-   end="sdram_master_0.clock" />
+   end="sort_component.clock" />
  <connection
    kind="clock"
    version="15.0"
@@ -1059,16 +1260,18 @@
   <parameter name="irqNumber" value="0" />
  </connection>
  <connection
+   kind="interrupt"
+   version="15.0"
+   start="hps_0.f2h_irq0"
+   end="average_to_hps.irq">
+  <parameter name="irqNumber" value="1" />
+ </connection>
+ <connection
    kind="reset"
    version="15.0"
    start="hps_0.h2f_reset"
    end="jtag_uart_0.reset" />
  <connection kind="reset" version="15.0" start="hps_0.h2f_reset" end="SDRAM.reset" />
- <connection
-   kind="reset"
-   version="15.0"
-   start="hps_0.h2f_reset"
-   end="sdram_master_0.reset" />
  <connection
    kind="reset"
    version="15.0"
@@ -1084,6 +1287,26 @@
    version="15.0"
    start="hps_0.h2f_reset"
    end="length_from_hps.reset" />
+ <connection
+   kind="reset"
+   version="15.0"
+   start="hps_0.h2f_reset"
+   end="sort_component.reset" />
+ <connection
+   kind="reset"
+   version="15.0"
+   start="hps_0.h2f_reset"
+   end="average_to_hps.reset" />
+ <connection
+   kind="reset"
+   version="15.0"
+   start="hps_0.h2f_reset"
+   end="readaddress_from_hps.reset" />
+ <connection
+   kind="reset"
+   version="15.0"
+   start="hps_0.h2f_reset"
+   end="writeaddress_from_hps.reset" />
  <connection
    kind="reset"
    version="15.0"
@@ -1103,11 +1326,6 @@
    kind="reset"
    version="15.0"
    start="sys_clk.reset_source"
-   end="sdram_master_0.reset" />
- <connection
-   kind="reset"
-   version="15.0"
-   start="sys_clk.reset_source"
    end="ready_bit_from_hps.reset" />
  <connection
    kind="reset"
@@ -1119,6 +1337,26 @@
    version="15.0"
    start="sys_clk.reset_source"
    end="length_from_hps.reset" />
+ <connection
+   kind="reset"
+   version="15.0"
+   start="sys_clk.reset_source"
+   end="sort_component.reset" />
+ <connection
+   kind="reset"
+   version="15.0"
+   start="sys_clk.reset_source"
+   end="average_to_hps.reset" />
+ <connection
+   kind="reset"
+   version="15.0"
+   start="sys_clk.reset_source"
+   end="readaddress_from_hps.reset" />
+ <connection
+   kind="reset"
+   version="15.0"
+   start="sys_clk.reset_source"
+   end="writeaddress_from_hps.reset" />
  <connection
    kind="reset"
    version="15.0"

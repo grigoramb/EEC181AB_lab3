@@ -28,7 +28,7 @@
 // ------------------------------------------
 // Generation parameters:
 //   output_name:         mysystem_mm_interconnect_0_cmd_demux
-//   ST_DATA_W:           236
+//   ST_DATA_W:           235
 //   ST_CHANNEL_W:        3
 //   NUM_OUTPUTS:         2
 //   VALID_WIDTH:         3
@@ -46,7 +46,7 @@ module mysystem_mm_interconnect_0_cmd_demux
     // Sink
     // -------------------
     input  [3-1      : 0]   sink_valid,
-    input  [236-1    : 0]   sink_data, // ST_DATA_W=236
+    input  [235-1    : 0]   sink_data, // ST_DATA_W=235
     input  [3-1 : 0]   sink_channel, // ST_CHANNEL_W=3
     input                         sink_startofpacket,
     input                         sink_endofpacket,
@@ -56,14 +56,14 @@ module mysystem_mm_interconnect_0_cmd_demux
     // Sources 
     // -------------------
     output reg                      src0_valid,
-    output reg [236-1    : 0] src0_data, // ST_DATA_W=236
+    output reg [235-1    : 0] src0_data, // ST_DATA_W=235
     output reg [3-1 : 0] src0_channel, // ST_CHANNEL_W=3
     output reg                      src0_startofpacket,
     output reg                      src0_endofpacket,
     input                           src0_ready,
 
     output reg                      src1_valid,
-    output reg [236-1    : 0] src1_data, // ST_DATA_W=236
+    output reg [235-1    : 0] src1_data, // ST_DATA_W=235
     output reg [3-1 : 0] src1_channel, // ST_CHANNEL_W=3
     output reg                      src1_startofpacket,
     output reg                      src1_endofpacket,

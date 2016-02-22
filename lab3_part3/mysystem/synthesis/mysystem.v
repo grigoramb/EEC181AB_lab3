@@ -4,55 +4,59 @@
 
 `timescale 1 ps / 1 ps
 module mysystem (
-		input  wire        done_bit_export,                  //               done_bit.export
-		output wire [5:0]  length_from_hps_export,           //        length_from_hps.export
-		output wire [12:0] memory_mem_a,                     //                 memory.mem_a
-		output wire [2:0]  memory_mem_ba,                    //                       .mem_ba
-		output wire        memory_mem_ck,                    //                       .mem_ck
-		output wire        memory_mem_ck_n,                  //                       .mem_ck_n
-		output wire        memory_mem_cke,                   //                       .mem_cke
-		output wire        memory_mem_cs_n,                  //                       .mem_cs_n
-		output wire        memory_mem_ras_n,                 //                       .mem_ras_n
-		output wire        memory_mem_cas_n,                 //                       .mem_cas_n
-		output wire        memory_mem_we_n,                  //                       .mem_we_n
-		output wire        memory_mem_reset_n,               //                       .mem_reset_n
-		inout  wire [7:0]  memory_mem_dq,                    //                       .mem_dq
-		inout  wire        memory_mem_dqs,                   //                       .mem_dqs
-		inout  wire        memory_mem_dqs_n,                 //                       .mem_dqs_n
-		output wire        memory_mem_odt,                   //                       .mem_odt
-		output wire        memory_mem_dm,                    //                       .mem_dm
-		input  wire        memory_oct_rzqin,                 //                       .oct_rzqin
-		output wire        ready_bit_export,                 //              ready_bit.export
-		output wire        sdram_clk_clk,                    //              sdram_clk.clk
-		output wire        sdram_master_0_control_done_out,  // sdram_master_0_control.done_out
-		input  wire        sdram_master_0_control_ready_in,  //                       .ready_in
-		input  wire [5:0]  sdram_master_0_control_length_in, //                       .length_in
-		output wire [15:0] sdram_master_0_debug_max_out,     //   sdram_master_0_debug.max_out
-		output wire [15:0] sdram_master_0_debug_min_out,     //                       .min_out
-		output wire [2:0]  sdram_master_0_debug_state_out,   //                       .state_out
-		output wire [12:0] sdram_wire_addr,                  //             sdram_wire.addr
-		output wire [1:0]  sdram_wire_ba,                    //                       .ba
-		output wire        sdram_wire_cas_n,                 //                       .cas_n
-		output wire        sdram_wire_cke,                   //                       .cke
-		output wire        sdram_wire_cs_n,                  //                       .cs_n
-		inout  wire [15:0] sdram_wire_dq,                    //                       .dq
-		output wire [1:0]  sdram_wire_dqm,                   //                       .dqm
-		output wire        sdram_wire_ras_n,                 //                       .ras_n
-		output wire        sdram_wire_we_n,                  //                       .we_n
-		input  wire        system_ref_clk_clk,               //         system_ref_clk.clk
-		input  wire        system_ref_reset_reset            //       system_ref_reset.reset
+		input  wire [15:0] average_to_hps_export,        //        average_to_hps.export
+		output wire        control_done,                 //               control.done
+		input  wire [6:0]  control_length,               //                      .length
+		input  wire [31:0] control_readaddress,          //                      .readaddress
+		input  wire        control_ready,                //                      .ready
+		output wire [2:0]  control_state,                //                      .state
+		input  wire [31:0] control_writeaddress,         //                      .writeaddress
+		output wire [15:0] control_average,              //                      .average
+		input  wire        done_bit_export,              //              done_bit.export
+		output wire [6:0]  length_from_hps_export,       //       length_from_hps.export
+		output wire [12:0] memory_mem_a,                 //                memory.mem_a
+		output wire [2:0]  memory_mem_ba,                //                      .mem_ba
+		output wire        memory_mem_ck,                //                      .mem_ck
+		output wire        memory_mem_ck_n,              //                      .mem_ck_n
+		output wire        memory_mem_cke,               //                      .mem_cke
+		output wire        memory_mem_cs_n,              //                      .mem_cs_n
+		output wire        memory_mem_ras_n,             //                      .mem_ras_n
+		output wire        memory_mem_cas_n,             //                      .mem_cas_n
+		output wire        memory_mem_we_n,              //                      .mem_we_n
+		output wire        memory_mem_reset_n,           //                      .mem_reset_n
+		inout  wire [7:0]  memory_mem_dq,                //                      .mem_dq
+		inout  wire        memory_mem_dqs,               //                      .mem_dqs
+		inout  wire        memory_mem_dqs_n,             //                      .mem_dqs_n
+		output wire        memory_mem_odt,               //                      .mem_odt
+		output wire        memory_mem_dm,                //                      .mem_dm
+		input  wire        memory_oct_rzqin,             //                      .oct_rzqin
+		output wire [31:0] readaddress_from_hps_export,  //  readaddress_from_hps.export
+		output wire        ready_bit_export,             //             ready_bit.export
+		output wire        sdram_clk_clk,                //             sdram_clk.clk
+		output wire [12:0] sdram_wire_addr,              //            sdram_wire.addr
+		output wire [1:0]  sdram_wire_ba,                //                      .ba
+		output wire        sdram_wire_cas_n,             //                      .cas_n
+		output wire        sdram_wire_cke,               //                      .cke
+		output wire        sdram_wire_cs_n,              //                      .cs_n
+		inout  wire [15:0] sdram_wire_dq,                //                      .dq
+		output wire [1:0]  sdram_wire_dqm,               //                      .dqm
+		output wire        sdram_wire_ras_n,             //                      .ras_n
+		output wire        sdram_wire_we_n,              //                      .we_n
+		input  wire        system_ref_clk_clk,           //        system_ref_clk.clk
+		input  wire        system_ref_reset_reset,       //      system_ref_reset.reset
+		output wire [31:0] writeaddress_from_hps_export  // writeaddress_from_hps.export
 	);
 
-	wire          sys_clk_sys_clk_clk;                                         // sys_clk:sys_clk_clk -> [SDRAM:clk, done_bit_to_hps:clk, hps_0:f2h_axi_clk, hps_0:h2f_axi_clk, hps_0:h2f_lw_axi_clk, jtag_uart_0:clk, length_from_hps:clk, mm_interconnect_0:sys_clk_sys_clk_clk, mm_interconnect_1:sys_clk_sys_clk_clk, onchip_memory2_0:clk, ready_bit_from_hps:clk, rst_controller:clk, rst_controller_001:clk, sdram_master_0:clk]
-	wire          sdram_master_0_avalon_master_chipselect;                     // sdram_master_0:chipselect -> mm_interconnect_0:sdram_master_0_avalon_master_chipselect
-	wire          sdram_master_0_avalon_master_waitrequest;                    // mm_interconnect_0:sdram_master_0_avalon_master_waitrequest -> sdram_master_0:waitrequest
-	wire   [15:0] sdram_master_0_avalon_master_readdata;                       // mm_interconnect_0:sdram_master_0_avalon_master_readdata -> sdram_master_0:readdata
-	wire          sdram_master_0_avalon_master_read;                           // sdram_master_0:read_n -> mm_interconnect_0:sdram_master_0_avalon_master_read
-	wire   [31:0] sdram_master_0_avalon_master_address;                        // sdram_master_0:address -> mm_interconnect_0:sdram_master_0_avalon_master_address
-	wire    [1:0] sdram_master_0_avalon_master_byteenable;                     // sdram_master_0:byteenable -> mm_interconnect_0:sdram_master_0_avalon_master_byteenable
-	wire          sdram_master_0_avalon_master_readdatavalid;                  // mm_interconnect_0:sdram_master_0_avalon_master_readdatavalid -> sdram_master_0:readdatavalid
-	wire          sdram_master_0_avalon_master_write;                          // sdram_master_0:write_n -> mm_interconnect_0:sdram_master_0_avalon_master_write
-	wire   [15:0] sdram_master_0_avalon_master_writedata;                      // sdram_master_0:writedata -> mm_interconnect_0:sdram_master_0_avalon_master_writedata
+	wire          sys_clk_sys_clk_clk;                                         // sys_clk:sys_clk_clk -> [SDRAM:clk, average_to_hps:clk, done_bit_to_hps:clk, hps_0:f2h_axi_clk, hps_0:h2f_axi_clk, hps_0:h2f_lw_axi_clk, jtag_uart_0:clk, length_from_hps:clk, mm_interconnect_0:sys_clk_sys_clk_clk, mm_interconnect_1:sys_clk_sys_clk_clk, onchip_memory2_0:clk, readaddress_from_hps:clk, ready_bit_from_hps:clk, rst_controller:clk, rst_controller_001:clk, sort_component:clk, writeaddress_from_hps:clk]
+	wire          sort_component_avalon_master_chipselect;                     // sort_component:chipselect -> mm_interconnect_0:sort_component_avalon_master_chipselect
+	wire          sort_component_avalon_master_waitrequest;                    // mm_interconnect_0:sort_component_avalon_master_waitrequest -> sort_component:waitrequest
+	wire   [15:0] sort_component_avalon_master_readdata;                       // mm_interconnect_0:sort_component_avalon_master_readdata -> sort_component:readdata
+	wire          sort_component_avalon_master_read;                           // sort_component:read_n -> mm_interconnect_0:sort_component_avalon_master_read
+	wire   [31:0] sort_component_avalon_master_address;                        // sort_component:address -> mm_interconnect_0:sort_component_avalon_master_address
+	wire    [1:0] sort_component_avalon_master_byteenable;                     // sort_component:byteenable -> mm_interconnect_0:sort_component_avalon_master_byteenable
+	wire          sort_component_avalon_master_readdatavalid;                  // mm_interconnect_0:sort_component_avalon_master_readdatavalid -> sort_component:readdatavalid
+	wire          sort_component_avalon_master_write;                          // sort_component:write_n -> mm_interconnect_0:sort_component_avalon_master_write
+	wire   [15:0] sort_component_avalon_master_writedata;                      // sort_component:writedata -> mm_interconnect_0:sort_component_avalon_master_writedata
 	wire    [1:0] hps_0_h2f_axi_master_awburst;                                // hps_0:h2f_AWBURST -> mm_interconnect_0:hps_0_h2f_axi_master_awburst
 	wire    [3:0] hps_0_h2f_axi_master_arlen;                                  // hps_0:h2f_ARLEN -> mm_interconnect_0:hps_0_h2f_axi_master_arlen
 	wire   [15:0] hps_0_h2f_axi_master_wstrb;                                  // hps_0:h2f_WSTRB -> mm_interconnect_0:hps_0_h2f_axi_master_wstrb
@@ -163,11 +167,27 @@ module mysystem (
 	wire    [1:0] mm_interconnect_1_length_from_hps_s1_address;                // mm_interconnect_1:length_from_hps_s1_address -> length_from_hps:address
 	wire          mm_interconnect_1_length_from_hps_s1_write;                  // mm_interconnect_1:length_from_hps_s1_write -> length_from_hps:write_n
 	wire   [31:0] mm_interconnect_1_length_from_hps_s1_writedata;              // mm_interconnect_1:length_from_hps_s1_writedata -> length_from_hps:writedata
+	wire          mm_interconnect_1_average_to_hps_s1_chipselect;              // mm_interconnect_1:average_to_hps_s1_chipselect -> average_to_hps:chipselect
+	wire   [31:0] mm_interconnect_1_average_to_hps_s1_readdata;                // average_to_hps:readdata -> mm_interconnect_1:average_to_hps_s1_readdata
+	wire    [1:0] mm_interconnect_1_average_to_hps_s1_address;                 // mm_interconnect_1:average_to_hps_s1_address -> average_to_hps:address
+	wire          mm_interconnect_1_average_to_hps_s1_write;                   // mm_interconnect_1:average_to_hps_s1_write -> average_to_hps:write_n
+	wire   [31:0] mm_interconnect_1_average_to_hps_s1_writedata;               // mm_interconnect_1:average_to_hps_s1_writedata -> average_to_hps:writedata
+	wire          mm_interconnect_1_readaddress_from_hps_s1_chipselect;        // mm_interconnect_1:readaddress_from_hps_s1_chipselect -> readaddress_from_hps:chipselect
+	wire   [31:0] mm_interconnect_1_readaddress_from_hps_s1_readdata;          // readaddress_from_hps:readdata -> mm_interconnect_1:readaddress_from_hps_s1_readdata
+	wire    [1:0] mm_interconnect_1_readaddress_from_hps_s1_address;           // mm_interconnect_1:readaddress_from_hps_s1_address -> readaddress_from_hps:address
+	wire          mm_interconnect_1_readaddress_from_hps_s1_write;             // mm_interconnect_1:readaddress_from_hps_s1_write -> readaddress_from_hps:write_n
+	wire   [31:0] mm_interconnect_1_readaddress_from_hps_s1_writedata;         // mm_interconnect_1:readaddress_from_hps_s1_writedata -> readaddress_from_hps:writedata
+	wire          mm_interconnect_1_writeaddress_from_hps_s1_chipselect;       // mm_interconnect_1:writeaddress_from_hps_s1_chipselect -> writeaddress_from_hps:chipselect
+	wire   [31:0] mm_interconnect_1_writeaddress_from_hps_s1_readdata;         // writeaddress_from_hps:readdata -> mm_interconnect_1:writeaddress_from_hps_s1_readdata
+	wire    [1:0] mm_interconnect_1_writeaddress_from_hps_s1_address;          // mm_interconnect_1:writeaddress_from_hps_s1_address -> writeaddress_from_hps:address
+	wire          mm_interconnect_1_writeaddress_from_hps_s1_write;            // mm_interconnect_1:writeaddress_from_hps_s1_write -> writeaddress_from_hps:write_n
+	wire   [31:0] mm_interconnect_1_writeaddress_from_hps_s1_writedata;        // mm_interconnect_1:writeaddress_from_hps_s1_writedata -> writeaddress_from_hps:writedata
 	wire          irq_mapper_receiver0_irq;                                    // jtag_uart_0:av_irq -> irq_mapper:receiver0_irq
 	wire          irq_mapper_receiver1_irq;                                    // done_bit_to_hps:irq -> irq_mapper:receiver1_irq
+	wire          irq_mapper_receiver2_irq;                                    // average_to_hps:irq -> irq_mapper:receiver2_irq
 	wire   [31:0] hps_0_f2h_irq0_irq;                                          // irq_mapper:sender_irq -> hps_0:f2h_irq_p0
 	wire   [31:0] hps_0_f2h_irq1_irq;                                          // irq_mapper_001:sender_irq -> hps_0:f2h_irq_p1
-	wire          rst_controller_reset_out_reset;                              // rst_controller:reset_out -> [SDRAM:reset_n, done_bit_to_hps:reset_n, jtag_uart_0:rst_n, length_from_hps:reset_n, mm_interconnect_0:sdram_master_0_reset_reset_bridge_in_reset_reset, mm_interconnect_1:jtag_uart_0_reset_reset_bridge_in_reset_reset, onchip_memory2_0:reset, ready_bit_from_hps:reset_n, rst_translator:in_reset, sdram_master_0:reset_n]
+	wire          rst_controller_reset_out_reset;                              // rst_controller:reset_out -> [SDRAM:reset_n, average_to_hps:reset_n, done_bit_to_hps:reset_n, jtag_uart_0:rst_n, length_from_hps:reset_n, mm_interconnect_0:sort_component_reset_reset_bridge_in_reset_reset, mm_interconnect_1:jtag_uart_0_reset_reset_bridge_in_reset_reset, onchip_memory2_0:reset, readaddress_from_hps:reset_n, ready_bit_from_hps:reset_n, rst_translator:in_reset, sort_component:reset_n, writeaddress_from_hps:reset_n]
 	wire          rst_controller_reset_out_reset_req;                          // rst_controller:reset_req -> [onchip_memory2_0:reset_req, rst_translator:reset_req_in]
 	wire          hps_0_h2f_reset_reset;                                       // hps_0:h2f_rst_n -> [rst_controller:reset_in0, rst_controller_001:reset_in0]
 	wire          sys_clk_reset_source_reset;                                  // sys_clk:reset_source_reset -> rst_controller:reset_in1
@@ -194,6 +214,18 @@ module mysystem (
 		.zs_dqm         (sdram_wire_dqm),                           //      .export
 		.zs_ras_n       (sdram_wire_ras_n),                         //      .export
 		.zs_we_n        (sdram_wire_we_n)                           //      .export
+	);
+
+	mysystem_average_to_hps average_to_hps (
+		.clk        (sys_clk_sys_clk_clk),                            //                 clk.clk
+		.reset_n    (~rst_controller_reset_out_reset),                //               reset.reset_n
+		.address    (mm_interconnect_1_average_to_hps_s1_address),    //                  s1.address
+		.write_n    (~mm_interconnect_1_average_to_hps_s1_write),     //                    .write_n
+		.writedata  (mm_interconnect_1_average_to_hps_s1_writedata),  //                    .writedata
+		.chipselect (mm_interconnect_1_average_to_hps_s1_chipselect), //                    .chipselect
+		.readdata   (mm_interconnect_1_average_to_hps_s1_readdata),   //                    .readdata
+		.in_port    (average_to_hps_export),                          // external_connection.export
+		.irq        (irq_mapper_receiver2_irq)                        //                 irq.irq
 	);
 
 	mysystem_done_bit_to_hps done_bit_to_hps (
@@ -383,6 +415,17 @@ module mysystem (
 		.reset_req  (rst_controller_reset_out_reset_req)                //       .reset_req
 	);
 
+	mysystem_readaddress_from_hps readaddress_from_hps (
+		.clk        (sys_clk_sys_clk_clk),                                  //                 clk.clk
+		.reset_n    (~rst_controller_reset_out_reset),                      //               reset.reset_n
+		.address    (mm_interconnect_1_readaddress_from_hps_s1_address),    //                  s1.address
+		.write_n    (~mm_interconnect_1_readaddress_from_hps_s1_write),     //                    .write_n
+		.writedata  (mm_interconnect_1_readaddress_from_hps_s1_writedata),  //                    .writedata
+		.chipselect (mm_interconnect_1_readaddress_from_hps_s1_chipselect), //                    .chipselect
+		.readdata   (mm_interconnect_1_readaddress_from_hps_s1_readdata),   //                    .readdata
+		.out_port   (readaddress_from_hps_export)                           // external_connection.export
+	);
+
 	mysystem_ready_bit_from_hps ready_bit_from_hps (
 		.clk        (sys_clk_sys_clk_clk),                                //                 clk.clk
 		.reset_n    (~rst_controller_reset_out_reset),                    //               reset.reset_n
@@ -394,24 +437,25 @@ module mysystem (
 		.out_port   (ready_bit_export)                                    // external_connection.export
 	);
 
-	sdram_master sdram_master_0 (
+	sort sort_component (
 		.clk           (sys_clk_sys_clk_clk),                        //         clock.clk
 		.reset_n       (~rst_controller_reset_out_reset),            //         reset.reset_n
-		.read_n        (sdram_master_0_avalon_master_read),          // avalon_master.read_n
-		.write_n       (sdram_master_0_avalon_master_write),         //              .write_n
-		.chipselect    (sdram_master_0_avalon_master_chipselect),    //              .chipselect
-		.waitrequest   (sdram_master_0_avalon_master_waitrequest),   //              .waitrequest
-		.address       (sdram_master_0_avalon_master_address),       //              .address
-		.byteenable    (sdram_master_0_avalon_master_byteenable),    //              .byteenable
-		.readdatavalid (sdram_master_0_avalon_master_readdatavalid), //              .readdatavalid
-		.readdata      (sdram_master_0_avalon_master_readdata),      //              .readdata
-		.writedata     (sdram_master_0_avalon_master_writedata),     //              .writedata
-		.done          (sdram_master_0_control_done_out),            //       control.done_out
-		.ready         (sdram_master_0_control_ready_in),            //              .ready_in
-		.length        (sdram_master_0_control_length_in),           //              .length_in
-		.max           (sdram_master_0_debug_max_out),               //         debug.max_out
-		.min           (sdram_master_0_debug_min_out),               //              .min_out
-		.state         (sdram_master_0_debug_state_out)              //              .state_out
+		.waitrequest   (sort_component_avalon_master_waitrequest),   // avalon_master.waitrequest
+		.readdatavalid (sort_component_avalon_master_readdatavalid), //              .readdatavalid
+		.readdata      (sort_component_avalon_master_readdata),      //              .readdata
+		.read_n        (sort_component_avalon_master_read),          //              .read_n
+		.write_n       (sort_component_avalon_master_write),         //              .write_n
+		.chipselect    (sort_component_avalon_master_chipselect),    //              .chipselect
+		.address       (sort_component_avalon_master_address),       //              .address
+		.byteenable    (sort_component_avalon_master_byteenable),    //              .byteenable
+		.writedata     (sort_component_avalon_master_writedata),     //              .writedata
+		.done          (control_done),                               //       control.done
+		.length        (control_length),                             //              .length
+		.readaddress   (control_readaddress),                        //              .readaddress
+		.ready         (control_ready),                              //              .ready
+		.state         (control_state),                              //              .state
+		.writeaddress  (control_writeaddress),                       //              .writeaddress
+		.averageout    (control_average)                             //              .average
 	);
 
 	mysystem_sys_clk sys_clk (
@@ -420,6 +464,17 @@ module mysystem (
 		.sys_clk_clk        (sys_clk_sys_clk_clk),        //      sys_clk.clk
 		.sdram_clk_clk      (sdram_clk_clk),              //    sdram_clk.clk
 		.reset_source_reset (sys_clk_reset_source_reset)  // reset_source.reset
+	);
+
+	mysystem_readaddress_from_hps writeaddress_from_hps (
+		.clk        (sys_clk_sys_clk_clk),                                   //                 clk.clk
+		.reset_n    (~rst_controller_reset_out_reset),                       //               reset.reset_n
+		.address    (mm_interconnect_1_writeaddress_from_hps_s1_address),    //                  s1.address
+		.write_n    (~mm_interconnect_1_writeaddress_from_hps_s1_write),     //                    .write_n
+		.writedata  (mm_interconnect_1_writeaddress_from_hps_s1_writedata),  //                    .writedata
+		.chipselect (mm_interconnect_1_writeaddress_from_hps_s1_chipselect), //                    .chipselect
+		.readdata   (mm_interconnect_1_writeaddress_from_hps_s1_readdata),   //                    .readdata
+		.out_port   (writeaddress_from_hps_export)                           // external_connection.export
 	);
 
 	mysystem_mm_interconnect_0 mm_interconnect_0 (
@@ -461,16 +516,16 @@ module mysystem (
 		.hps_0_h2f_axi_master_rready                                      (hps_0_h2f_axi_master_rready),                      //                                                           .rready
 		.sys_clk_sys_clk_clk                                              (sys_clk_sys_clk_clk),                              //                                            sys_clk_sys_clk.clk
 		.hps_0_h2f_axi_master_agent_clk_reset_reset_bridge_in_reset_reset (rst_controller_001_reset_out_reset),               // hps_0_h2f_axi_master_agent_clk_reset_reset_bridge_in_reset.reset
-		.sdram_master_0_reset_reset_bridge_in_reset_reset                 (rst_controller_reset_out_reset),                   //                 sdram_master_0_reset_reset_bridge_in_reset.reset
-		.sdram_master_0_avalon_master_address                             (sdram_master_0_avalon_master_address),             //                               sdram_master_0_avalon_master.address
-		.sdram_master_0_avalon_master_waitrequest                         (sdram_master_0_avalon_master_waitrequest),         //                                                           .waitrequest
-		.sdram_master_0_avalon_master_byteenable                          (sdram_master_0_avalon_master_byteenable),          //                                                           .byteenable
-		.sdram_master_0_avalon_master_chipselect                          (sdram_master_0_avalon_master_chipselect),          //                                                           .chipselect
-		.sdram_master_0_avalon_master_read                                (~sdram_master_0_avalon_master_read),               //                                                           .read
-		.sdram_master_0_avalon_master_readdata                            (sdram_master_0_avalon_master_readdata),            //                                                           .readdata
-		.sdram_master_0_avalon_master_readdatavalid                       (sdram_master_0_avalon_master_readdatavalid),       //                                                           .readdatavalid
-		.sdram_master_0_avalon_master_write                               (~sdram_master_0_avalon_master_write),              //                                                           .write
-		.sdram_master_0_avalon_master_writedata                           (sdram_master_0_avalon_master_writedata),           //                                                           .writedata
+		.sort_component_reset_reset_bridge_in_reset_reset                 (rst_controller_reset_out_reset),                   //                 sort_component_reset_reset_bridge_in_reset.reset
+		.sort_component_avalon_master_address                             (sort_component_avalon_master_address),             //                               sort_component_avalon_master.address
+		.sort_component_avalon_master_waitrequest                         (sort_component_avalon_master_waitrequest),         //                                                           .waitrequest
+		.sort_component_avalon_master_byteenable                          (sort_component_avalon_master_byteenable),          //                                                           .byteenable
+		.sort_component_avalon_master_chipselect                          (sort_component_avalon_master_chipselect),          //                                                           .chipselect
+		.sort_component_avalon_master_read                                (~sort_component_avalon_master_read),               //                                                           .read
+		.sort_component_avalon_master_readdata                            (sort_component_avalon_master_readdata),            //                                                           .readdata
+		.sort_component_avalon_master_readdatavalid                       (sort_component_avalon_master_readdatavalid),       //                                                           .readdatavalid
+		.sort_component_avalon_master_write                               (~sort_component_avalon_master_write),              //                                                           .write
+		.sort_component_avalon_master_writedata                           (sort_component_avalon_master_writedata),           //                                                           .writedata
 		.onchip_memory2_0_s1_address                                      (mm_interconnect_0_onchip_memory2_0_s1_address),    //                                        onchip_memory2_0_s1.address
 		.onchip_memory2_0_s1_write                                        (mm_interconnect_0_onchip_memory2_0_s1_write),      //                                                           .write
 		.onchip_memory2_0_s1_readdata                                     (mm_interconnect_0_onchip_memory2_0_s1_readdata),   //                                                           .readdata
@@ -529,6 +584,11 @@ module mysystem (
 		.sys_clk_sys_clk_clk                                                 (sys_clk_sys_clk_clk),                                         //                                               sys_clk_sys_clk.clk
 		.hps_0_h2f_lw_axi_master_agent_clk_reset_reset_bridge_in_reset_reset (rst_controller_001_reset_out_reset),                          // hps_0_h2f_lw_axi_master_agent_clk_reset_reset_bridge_in_reset.reset
 		.jtag_uart_0_reset_reset_bridge_in_reset_reset                       (rst_controller_reset_out_reset),                              //                       jtag_uart_0_reset_reset_bridge_in_reset.reset
+		.average_to_hps_s1_address                                           (mm_interconnect_1_average_to_hps_s1_address),                 //                                             average_to_hps_s1.address
+		.average_to_hps_s1_write                                             (mm_interconnect_1_average_to_hps_s1_write),                   //                                                              .write
+		.average_to_hps_s1_readdata                                          (mm_interconnect_1_average_to_hps_s1_readdata),                //                                                              .readdata
+		.average_to_hps_s1_writedata                                         (mm_interconnect_1_average_to_hps_s1_writedata),               //                                                              .writedata
+		.average_to_hps_s1_chipselect                                        (mm_interconnect_1_average_to_hps_s1_chipselect),              //                                                              .chipselect
 		.done_bit_to_hps_s1_address                                          (mm_interconnect_1_done_bit_to_hps_s1_address),                //                                            done_bit_to_hps_s1.address
 		.done_bit_to_hps_s1_write                                            (mm_interconnect_1_done_bit_to_hps_s1_write),                  //                                                              .write
 		.done_bit_to_hps_s1_readdata                                         (mm_interconnect_1_done_bit_to_hps_s1_readdata),               //                                                              .readdata
@@ -546,11 +606,21 @@ module mysystem (
 		.length_from_hps_s1_readdata                                         (mm_interconnect_1_length_from_hps_s1_readdata),               //                                                              .readdata
 		.length_from_hps_s1_writedata                                        (mm_interconnect_1_length_from_hps_s1_writedata),              //                                                              .writedata
 		.length_from_hps_s1_chipselect                                       (mm_interconnect_1_length_from_hps_s1_chipselect),             //                                                              .chipselect
+		.readaddress_from_hps_s1_address                                     (mm_interconnect_1_readaddress_from_hps_s1_address),           //                                       readaddress_from_hps_s1.address
+		.readaddress_from_hps_s1_write                                       (mm_interconnect_1_readaddress_from_hps_s1_write),             //                                                              .write
+		.readaddress_from_hps_s1_readdata                                    (mm_interconnect_1_readaddress_from_hps_s1_readdata),          //                                                              .readdata
+		.readaddress_from_hps_s1_writedata                                   (mm_interconnect_1_readaddress_from_hps_s1_writedata),         //                                                              .writedata
+		.readaddress_from_hps_s1_chipselect                                  (mm_interconnect_1_readaddress_from_hps_s1_chipselect),        //                                                              .chipselect
 		.ready_bit_from_hps_s1_address                                       (mm_interconnect_1_ready_bit_from_hps_s1_address),             //                                         ready_bit_from_hps_s1.address
 		.ready_bit_from_hps_s1_write                                         (mm_interconnect_1_ready_bit_from_hps_s1_write),               //                                                              .write
 		.ready_bit_from_hps_s1_readdata                                      (mm_interconnect_1_ready_bit_from_hps_s1_readdata),            //                                                              .readdata
 		.ready_bit_from_hps_s1_writedata                                     (mm_interconnect_1_ready_bit_from_hps_s1_writedata),           //                                                              .writedata
-		.ready_bit_from_hps_s1_chipselect                                    (mm_interconnect_1_ready_bit_from_hps_s1_chipselect)           //                                                              .chipselect
+		.ready_bit_from_hps_s1_chipselect                                    (mm_interconnect_1_ready_bit_from_hps_s1_chipselect),          //                                                              .chipselect
+		.writeaddress_from_hps_s1_address                                    (mm_interconnect_1_writeaddress_from_hps_s1_address),          //                                      writeaddress_from_hps_s1.address
+		.writeaddress_from_hps_s1_write                                      (mm_interconnect_1_writeaddress_from_hps_s1_write),            //                                                              .write
+		.writeaddress_from_hps_s1_readdata                                   (mm_interconnect_1_writeaddress_from_hps_s1_readdata),         //                                                              .readdata
+		.writeaddress_from_hps_s1_writedata                                  (mm_interconnect_1_writeaddress_from_hps_s1_writedata),        //                                                              .writedata
+		.writeaddress_from_hps_s1_chipselect                                 (mm_interconnect_1_writeaddress_from_hps_s1_chipselect)        //                                                              .chipselect
 	);
 
 	mysystem_irq_mapper irq_mapper (
@@ -558,6 +628,7 @@ module mysystem (
 		.reset         (),                         // clk_reset.reset
 		.receiver0_irq (irq_mapper_receiver0_irq), // receiver0.irq
 		.receiver1_irq (irq_mapper_receiver1_irq), // receiver1.irq
+		.receiver2_irq (irq_mapper_receiver2_irq), // receiver2.irq
 		.sender_irq    (hps_0_f2h_irq0_irq)        //    sender.irq
 	);
 

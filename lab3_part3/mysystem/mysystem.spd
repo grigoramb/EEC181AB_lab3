@@ -234,7 +234,7 @@
  <file
    path="simulation/submodules/altera_merlin_master_agent.sv"
    type="SYSTEM_VERILOG"
-   library="sdram_master_0_avalon_master_agent" />
+   library="sort_component_avalon_master_agent" />
  <file
    path="simulation/submodules/altera_merlin_axi_master_ni.sv"
    type="SYSTEM_VERILOG"
@@ -250,7 +250,7 @@
  <file
    path="simulation/submodules/altera_merlin_master_translator.sv"
    type="SYSTEM_VERILOG"
-   library="sdram_master_0_avalon_master_translator" />
+   library="sort_component_avalon_master_translator" />
  <file
    path="simulation/submodules/altera_up_avalon_reset_from_locked_signal.v"
    type="VERILOG"
@@ -332,13 +332,17 @@
    type="VERILOG"
    library="sys_clk" />
  <file
-   path="simulation/submodules/sdram_master.v"
+   path="simulation/submodules/sort.v"
    type="VERILOG"
-   library="sdram_master_0" />
+   library="sort_component" />
  <file
    path="simulation/submodules/mysystem_ready_bit_from_hps.v"
    type="VERILOG"
    library="ready_bit_from_hps" />
+ <file
+   path="simulation/submodules/mysystem_readaddress_from_hps.v"
+   type="VERILOG"
+   library="readaddress_from_hps" />
  <file
    path="simulation/submodules/mysystem_onchip_memory2_0.v"
    type="VERILOG"
@@ -364,11 +368,15 @@
    type="VERILOG"
    library="done_bit_to_hps" />
  <file
-   path="simulation/submodules/mysystem_SDRAM.v"
+   path="simulation/submodules/mysystem_average_to_hps.v"
+   type="VERILOG"
+   library="average_to_hps" />
+ <file
+   path="simulation/submodules/mysystem_SDRAM_test_component.v"
    type="VERILOG"
    library="SDRAM" />
  <file
-   path="simulation/submodules/mysystem_SDRAM_test_component.v"
+   path="simulation/submodules/mysystem_SDRAM.v"
    type="VERILOG"
    library="SDRAM" />
  <file path="simulation/mysystem.v" type="VERILOG" />

@@ -116,9 +116,9 @@ module lab3(
 	hex_7seg hex1 (inputnum[7:4],HEX1);
 	hex_7seg hex2 (inputnum[11:8],HEX2);
 	hex_7seg hex3 (inputnum[15:12],HEX3);
-	hex_7seg hex4 (inputnum[19:16],HEX4);
-	hex_7seg hex5 (inputnum[23:20],HEX5);
-	assign LEDR[7:0] = inputnum[31:24];
+	//hex_7seg hex4 (inputnum[19:16],HEX4);
+	//hex_7seg hex5 (inputnum[23:20],HEX5);
+	//assign LEDR[7:0] = inputnum[31:24];
 	
 	wire done; // done signal from sdram_master -> HPS
 	wire ready_bit; // ready signal from HPS -> sdram_master
@@ -155,21 +155,24 @@ module lab3(
         .ready_bit_export       (ready_from_HPS),                            //              ready_bit.export
         .done_bit_export        (done_from_MASTER),                              //               done_bit.export		  
         .length_from_hps_export           (length),            //        length_from_hps.export        //.sdram_master_0_conduit_done_out (done_from_MASTER), // sdram_master_0_conduit.done_out
-        //.sdram_master_0_conduit_ready_in (ready_from_HPS), //                       .ready_in
-        //.sdram_master_0_conduit_max_out  (),  //                       .max_out
-        //.sdram_master_0_conduit_min_out  (),//                       .min_out
-        .sdram_master_0_control_done_out    (done_from_MASTER),    // sdram_master_0_control.done_out
-        .sdram_master_0_control_length_in (length), //                       .length_in
-        .sdram_master_0_control_ready_in    (ready_from_HPS | ~KEY[3]),    //                       .ready_in
-        .sdram_master_0_debug_max_out       (inputnum[31:16]),       //   sdram_master_0_debug.max_out
-        .sdram_master_0_debug_min_out       (inputnum[15:0])       //                       .min_out
-    );
-	 
+        .control_average        (inputnum[15:0]),        //          control.average
+        .control_done           (done_from_MASTER),           //                 .done
+        .control_length         (length),         //                 .length
+        .control_readaddress    (readadr), //not used yet    //                 .readaddress
+        .control_ready          (ready_from_HPS | ~KEY[3]),          //                 .ready
+        .control_state          (LEDR[7:5]),          //                 .state
+        .control_writeaddress   (writeadr),// not used yet    //                 .writeaddress
+        .average_to_hps_export  (inputnum[15:0]),   //   average_to_hps.export   );
+		  .readaddress_from_hps_export  (readadr),  //  readaddress_from_hps.export
+        .writeaddress_from_hps_export (writeadr)  // writeaddress_from_hps.export
+		);
+	wire [31:0] readadr;
+	wire [31:0] writeadr;
 	wire done_from_MASTER;
 	wire ready_from_HPS;
 	assign LEDR[9] = done_from_MASTER;
 	assign LEDR[8] = ready_from_HPS; 
-	wire [5:0] length;
+	wire [6:0] length;
 
 	 
 	 
